@@ -18,13 +18,13 @@ DataCenter dataCenterInit(int servers, int dataCenterID)//n: the numbers of serv
 
 }
 
-void dataCenterRemove(DataCenter toRemove) {
-    removeList(toRemove->windowsFree);
-    removeList(toRemove->windowsUsed);
-    removeList(toRemove->linuxFree);
-    removeList(toRemove->linuxUsed);
-    free(toRemove->arrayServersPointers);
-    free(toRemove);
+void dataCenterRemove(DataCenter dc) {
+    removeList(dc->windowsFree);
+    removeList(dc->windowsUsed);
+    removeList(dc->linuxFree);
+    removeList(dc->linuxUsed);
+    free(dc->arrayServersPointers);
+    free(dc);
 }
 
 void removeList( _node<Server> toRemove) {
