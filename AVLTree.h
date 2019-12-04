@@ -61,16 +61,16 @@ class AVLTree {
     void insert(K key, D data, AVLNode* parent);
     void deleteNode(AVLNode* toDelete);
     AVLNode* findAVLNode (K key) {
-            AVLNode* current = root;
-            while (current) {
-                if (current->key == key) return current;
-                if (current->key > key) {
-                    current = current->leftSon;
-                } else {
-                    current = current->rightSon;
-                }
+        AVLNode* current = root;
+        while (current) {
+            if (current->key == key) return current;
+            if (current->key > key) {
+                current = current->leftSon;
+            } else {
+                current = current->rightSon;
             }
-            return NULL;
+        }
+        return NULL;
     }
 
     void changeNode(AVLNode* parent, AVLNode* oldNode, AVLNode* newNode);
@@ -169,12 +169,12 @@ public:
         return NULL;
     }
     void inOrderNodeArray(AVLNode* node, AVLNode* arr[], int* i) const {
-            if (node) {
-                inOrderNodeArray(node->leftSon, arr, i);
-                arr[(*i)] = node;
-                (*i)++;
-                inOrderNodeArray(node->rightSon, arr, i);
-            }
+        if (node) {
+            inOrderNodeArray(node->leftSon, arr, i);
+            arr[(*i)] = node;
+            (*i)++;
+            inOrderNodeArray(node->rightSon, arr, i);
+        }
     }
 
     //TODO: check if needed
