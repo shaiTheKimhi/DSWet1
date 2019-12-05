@@ -52,6 +52,11 @@ class AVLTree {
         }
 
         friend class AVLTree;
+
+    public:
+        D getData(){
+            return data;
+        }
     };
 
     AVLNode* root; //Any tree is a Node as a root
@@ -60,18 +65,6 @@ class AVLTree {
     //main funcs in avl tree
     void insert(K key, D data, AVLNode* parent);
     void deleteNode(AVLNode* toDelete);
-    AVLNode* findAVLNode (K key) {
-        AVLNode* current = root;
-        while (current) {
-            if (current->key == key) return current;
-            if (current->key > key) {
-                current = current->leftSon;
-            } else {
-                current = current->rightSon;
-            }
-        }
-        return NULL;
-    }
 
     void changeNode(AVLNode* parent, AVLNode* oldNode, AVLNode* newNode);
     void reBalance(AVLNode* node, bool isDelete = false);
@@ -168,6 +161,8 @@ public:
         }
         return NULL;
     }
+
+
     void inOrderNodeArray(AVLNode* node, AVLNode* arr[], int* i) const {
         if (node) {
             inOrderNodeArray(node->leftSon, arr, i);
@@ -232,6 +227,10 @@ public:
             inorderPrint(n->rightSon);
         }
     }
+
+
+
+
     void print() const {
         if (size == 0) cout << "Empty tree" << endl;
         else inorderPrint(root);
@@ -269,7 +268,22 @@ public:
             printGraph(node->leftSon, prefix + "     ", BF);
         }
     }
+
+    AVLNode* findAVLNode (K key) {
+        AVLNode* current = root;
+        while (current) {
+            if (current->key == key) return current;
+            if (current->key > key) {
+                current = current->leftSon;
+            } else {
+                current = current->rightSon;
+            }
+        }
+        return NULL;
+    }
 };
+
+
 
 template<class K, class D>
 void AVLTree<K, D>::insert(K key, D data) {

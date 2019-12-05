@@ -6,10 +6,9 @@ DataCenter::DataCenter(int servers, int dataCenterID) {
     this->dataCenterID = dataCenterID;
     this->linuxServerCounter = servers;
     this->windowsServerCounter = 0;
-    this->arrayServersPointers = new _node<Server>*[servers];
-    for (int i = 0; i < servers; i++)
-    {
-        Server* temp = new Server();
+    this->arrayServersPointers = new _node<Server> *[servers];
+    for (int i = 0; i < servers; i++) {
+        Server *temp = new Server();
         temp->OS = this->linuxFree;
         temp->serverID = i;
         this->arrayServersPointers[i] = createNode(*temp);
@@ -17,10 +16,9 @@ DataCenter::DataCenter(int servers, int dataCenterID) {
     }
 }
 
-void removeList( _node<Server>* toRemove) {
-    while(toRemove != nullptr) {
-        _node<Server>* next = getNext(toRemove);
-        free(getValue(toRemove));
+void removeList(_node<Server> *toRemove) {
+    while (toRemove != nullptr) {
+        _node<Server> *next = getNext(toRemove);
         removeNode(&toRemove, toRemove);
         toRemove = next;
     }
@@ -31,51 +29,40 @@ DataCenter::~DataCenter() {
     removeList(this->windowsUsed);
     removeList(this->linuxFree);
     removeList(this->linuxUsed);
-    delete(this->arrayServersPointers);
+    delete (this->arrayServersPointers);
 }
 
-StatusType requestWindows(DataCenter toRequest, int serverID, int *assignedID) {
-    _node<Server> *originalPtr = toRequest.arrayServersPointers[serverID];
-    if (originalPtr->value.OS == toRequest.windowsFree) { //the request server is free
-        toRequest.arrayServersPointers[serverID] = createNode(getValue(toRequest.arrayServersPointers[serverID]));
-        addNode(&(toRequest.windowsUsed), toRequest.arrayServersPointers[serverID]);
-        removeNode(&(toRequest.windowsFree), originalPtr);
-        toRequest.arrayServersPointers[serverID]->value.OS = toRequest.windowsUsed;//downloading linux on the server & set it as used
-        *assignedID = serverID;
-        return SUCCESS;
-    }
-    if (originalPtr->value.OS == toRequest.linuxFree) { //the request server is free with different os
-        toRequest.arrayServersPointers[serverID] = createNode(getValue(toRequest.arrayServersPointers[serverID]));
-        addNode(&(toRequest.windowsUsed), toRequest.arrayServersPointers[serverID]);
-        removeNode(&(toRequest.linuxFree), originalPtr);
-        (*(toRequest.arrayServersPointers[serverID])).value.OS = toRequest.windowsUsed;//downloading linux on the server & set it as used
-        *assignedID = serverID;
-        toRequest.linuxServerCounter--;
-        toRequest.windowsServerCounter++;
-        return SUCCESS;
-    }
-    if (originalPtr->value.OS == toRequest.windowsUsed) { //the requested server is used
-        if (toRequest.windowsFree) {
-            Server serverToUse = getValue(toRequest.windowsFree);
-            _node<Server> *oldServerPtr = toRequest. arrayServersPointers[(serverToUse).serverID];
-            toRequest.arrayServersPointers[serverToUse.serverID] = createNode(serverToUse);
-            addNode(&(toRequest.windowsUsed),toRequest.arrayServersPointers[(serverToUse).serverID]);
-            serverToUse.OS = toRequest.windowsUsed;
-            removeNode(&(toRequest.windowsFree), oldServerPtr);
-            *assignedID = serverToUse.serverID;
-            return SUCCESS;
+StatusType DataCenter::requestWindows(int serverID, int *assignedID) {
+    _node<Server> *originalPtr = arrayServersPointers[serverID];
+
+
+    if (originalPtr->value.OS == windowsFree || originalPtr->value.OS == linuxFree) {
+        arrayServersPointers[serverID] = createNode(getValue(arrayServersPointers[serverID]));
+        addNode(&(windowsUsed), arrayServersPointers[serverID]);
+
+        if (originalPtr->value.OS == windowsFree) { //the request server is free
+            removeNode(&(windowsFree), originalPtr);
+            arrayServersPointers[serverID]->value.OS = windowsUsed;//downloading linux on the server & set it as used
         }
-        else { //there is no available server with the requested OS
-            if (toRequest.linuxFree) {
-                Server serverToUse = getValue(toRequest.linuxFree);
-                _node<Server> *oldServerPtr = toRequest.arrayServersPointers[serverToUse.serverID];
-                toRequest.arrayServersPointers[serverToUse.serverID] = createNode(serverToUse);
-                addNode(&(toRequest.windowsUsed),toRequest.arrayServersPointers[serverToUse.serverID]);
-                serverToUse.OS = toRequest.windowsUsed;
-                removeNode(&(toRequest.linuxFree), oldServerPtr);
-                *assignedID = serverToUse.serverID;
-                toRequest.linuxServerCounter--;
-                toRequest.windowsServerCounter++;
+        if (originalPtr->value.OS == linuxFree) { //the request server is free with different os
+            removeNode(&(linuxFree), originalPtr);
+            (*(arrayServersPointers[serverID])).value.OS = windowsUsed;//downloading linux on the server & set it as used
+            linuxServerCounter--;
+            windowsServerCounter++;
+        }
+        *assignedID = serverID;
+        return SUCCESS;
+    }
+
+    if (originalPtr->value.OS == windowsUsed) { //the requested server is used
+        if (windowsFree) {
+            usingFreeServer(assignedID, windowsFree, windowsUsed);
+            return SUCCESS;
+        } else { //there is no available server with the requested OS
+            if (linuxFree) {
+                usingFreeServer(assignedID, linuxFree, windowsUsed);
+                linuxServerCounter--;
+                windowsServerCounter++;
                 return SUCCESS;
             }
         }
@@ -83,48 +70,43 @@ StatusType requestWindows(DataCenter toRequest, int serverID, int *assignedID) {
     return FAILURE; //no available servers
 }
 
-StatusType requestLinux(DataCenter toRequest, int serverID, int *assignedID) {
-    _node<Server> *originalPtr = toRequest.arrayServersPointers[serverID];
-    if (originalPtr->value.OS == toRequest.linuxFree) { //the request server is free
-        toRequest.arrayServersPointers[serverID] = createNode(getValue(toRequest.arrayServersPointers[serverID]));
-        addNode(&(toRequest.linuxUsed), toRequest.arrayServersPointers[serverID]);
-        removeNode(&(toRequest.linuxFree), originalPtr);
-        toRequest.arrayServersPointers[serverID]->value.OS = toRequest.linuxUsed;//downloading linux on the server & set it as used
-        *assignedID = serverID;
-        return SUCCESS;
-    }
-    if (originalPtr->value.OS == toRequest.windowsFree) { //the request server is free with different os
-        toRequest.arrayServersPointers[serverID] = createNode(getValue(toRequest.arrayServersPointers[serverID]));
-        addNode(&(toRequest.linuxUsed), toRequest.arrayServersPointers[serverID]);
-        removeNode(&(toRequest.windowsFree), originalPtr);
-        toRequest.arrayServersPointers[serverID]->value.OS = toRequest.linuxUsed;//downloading linux on the server & set it as used
-        *assignedID = serverID;
-        toRequest.linuxServerCounter++;
-        toRequest.windowsServerCounter--;
-        return SUCCESS;
-    }
-    if (originalPtr->value.OS == toRequest.linuxUsed) { //the requested server is used
-        if (toRequest.linuxFree) {
-            Server serverToUse = getValue(toRequest.linuxFree);
-            _node<Server> *oldServerPtr = toRequest. arrayServersPointers[serverToUse.serverID];
-            toRequest.arrayServersPointers[serverToUse.serverID] = createNode(serverToUse);
-            addNode(&(toRequest.linuxUsed),toRequest.arrayServersPointers[serverToUse.serverID]);
-            serverToUse.OS = toRequest.linuxUsed;
-            removeNode(&(toRequest.linuxFree), oldServerPtr);
-            *assignedID = serverToUse.serverID;
-            return SUCCESS;
+void DataCenter::usingFreeServer(int *assignedID, _node<Server> *freeServers, _node<Server> *usedServer) {
+    Server serverToUse = getValue(freeServers);
+    _node<Server> *oldServerPtr = arrayServersPointers[(serverToUse).serverID];
+    arrayServersPointers[serverToUse.serverID] = createNode(serverToUse);
+    addNode(&(usedServer), arrayServersPointers[(serverToUse).serverID]);
+    serverToUse.OS = usedServer;
+    removeNode(&(freeServers), oldServerPtr);
+    *assignedID = serverToUse.serverID;
+}
+
+StatusType DataCenter::requestLinux(int serverID, int *assignedID) {
+    _node<Server> *originalPtr = arrayServersPointers[serverID];
+    if (originalPtr->value.OS == linuxFree || originalPtr->value.OS == windowsFree) {
+        arrayServersPointers[serverID] = createNode(getValue(arrayServersPointers[serverID]));
+        addNode(&(linuxUsed), arrayServersPointers[serverID]);
+        if (originalPtr->value.OS == linuxFree) { //the request server is free
+            removeNode(&(linuxFree), originalPtr);
         }
-        else { //there is no available server with the requested OS
-            if (toRequest.windowsFree) {
-                Server serverToUse = getValue(toRequest.windowsFree);
-                _node<Server> *oldServerPtr = toRequest.arrayServersPointers[serverToUse.serverID];
-                toRequest.arrayServersPointers[serverToUse.serverID] = createNode(serverToUse);
-                addNode(&(toRequest.linuxUsed),toRequest.arrayServersPointers[serverToUse.serverID]);
-                serverToUse.OS = toRequest.linuxUsed;
-                removeNode(&(toRequest.windowsFree), oldServerPtr);
-                *assignedID = serverToUse.serverID;
-                toRequest.linuxServerCounter++;
-                toRequest.windowsServerCounter--;
+        if (originalPtr->value.OS == windowsFree) { //the request server is free with different os
+            removeNode(&(windowsFree), originalPtr);
+            linuxServerCounter++;
+            windowsServerCounter--;
+        }
+        arrayServersPointers[serverID]->value.OS = linuxUsed;//downloading linux on the server & set it as used
+        *assignedID = serverID;
+        return SUCCESS;
+    }
+
+    if (originalPtr->value.OS == linuxUsed) { //the requested server is used
+        if (linuxFree) {
+            usingFreeServer(assignedID, linuxFree, linuxUsed);
+            return SUCCESS;
+        } else { //there is no available server with the requested OS
+            if (windowsFree) {
+                usingFreeServer(assignedID, windowsFree, linuxUsed);
+                linuxServerCounter++;
+                windowsServerCounter--;
                 return SUCCESS;
             }
         }
@@ -133,38 +115,38 @@ StatusType requestLinux(DataCenter toRequest, int serverID, int *assignedID) {
 }
 
 StatusType DataCenter::dataCenterRequestServer(int serverID, int os, int *assignedID) {
-    if (serverID >= this->windowsServerCounter + this->linuxServerCounter) return INVALID_INPUT;
-    return (os == 0) ?  requestLinux(*this, serverID,assignedID) : requestWindows(*this ,serverID,assignedID);
+    if (serverID >= windowsServerCounter + linuxServerCounter) return INVALID_INPUT;
+    return (os == 0) ? requestLinux(serverID, assignedID) : requestWindows(serverID, assignedID);
 }
 
 StatusType DataCenter::dataCenterFreeServer(int serverID) {
-    if (serverID >= this->windowsServerCounter + this->linuxServerCounter) return INVALID_INPUT;
-    if ((this->arrayServersPointers[serverID]->value.OS == this->linuxFree) ||
-        (this->arrayServersPointers[serverID]->value.OS == this->windowsFree)) return FAILURE;
-    _node<Server> *originalPtr = this->arrayServersPointers[serverID];
-    if (this->arrayServersPointers[serverID]->value.OS == this->linuxUsed) {
-        this->arrayServersPointers[serverID] = createNode(getValue(this->arrayServersPointers[serverID]));
-        addNode(&(this->linuxFree), this->arrayServersPointers[serverID]);
-        removeNode(&(this->linuxUsed), originalPtr);
-        this->arrayServersPointers[serverID]->value.OS = this->linuxFree;
-        return  SUCCESS;
-    }
-    else if (this->arrayServersPointers[serverID]->value.OS == this->windowsUsed) {
-        this->arrayServersPointers[serverID] = createNode(getValue(this->arrayServersPointers[serverID]));
-        addNode(&(this->windowsFree), this->arrayServersPointers[serverID]);
-        removeNode(&(this->windowsUsed), originalPtr);
-        this->arrayServersPointers[serverID]->value.OS = this->linuxFree;
-        return  SUCCESS;
+    if (serverID >= windowsServerCounter + linuxServerCounter) return INVALID_INPUT;
+    if ((arrayServersPointers[serverID]->value.OS == linuxFree) ||
+        (arrayServersPointers[serverID]->value.OS == windowsFree))
+        return FAILURE;
+    _node<Server> *originalPtr = arrayServersPointers[serverID];
+    if (arrayServersPointers[serverID]->value.OS == linuxUsed) {
+        arrayServersPointers[serverID] = createNode(getValue(arrayServersPointers[serverID]));
+        addNode(&(linuxFree), arrayServersPointers[serverID]);
+        removeNode(&(linuxUsed), originalPtr);
+        arrayServersPointers[serverID]->value.OS = linuxFree;
+        return SUCCESS;
+    } else if (arrayServersPointers[serverID]->value.OS == windowsUsed) {
+        arrayServersPointers[serverID] = createNode(getValue(arrayServersPointers[serverID]));
+        addNode(&(windowsFree), arrayServersPointers[serverID]);
+        removeNode(&(windowsUsed), originalPtr);
+        arrayServersPointers[serverID]->value.OS = linuxFree;
+        return SUCCESS;
     }
     return FAILURE;
 }
 
-int DataCenter::getLinuxCounter()) {
-    return this->linuxServerCounter;
+int DataCenter::getLinuxCounter() {
+    return linuxServerCounter;
 }
 
-int DataCenter::getWindowsCounter(DataCenter dataCenter) {
-    return this->windowsServerCounter;
+int DataCenter::getWindowsCounter() {
+    return windowsServerCounter;
 }
 
 
