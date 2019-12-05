@@ -21,6 +21,7 @@ DataCenter DataCenter::dataCenterInit(int servers, int dataCenterID) {
 void removeList( _node<Server>* toRemove) {
     while(toRemove != nullptr) {
         _node<Server>* next = getNext(toRemove);
+        free(getValue(toRemove));
         removeNode(&toRemove, toRemove);
         toRemove = next;
     }
