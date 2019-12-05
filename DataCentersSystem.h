@@ -4,8 +4,8 @@
 typedef struct _dataCenterSystem
 {
     AVLTree<int, DataCenter*> _dataCentersById;
-    AVLTree<int, DataCenter*> _dataCentersByLinuxCount;
-    AVLTree<int, DataCenter*> _dataCentersByWindowsCount;
+    AVLTree<int, AVLTree<int,int>*> _dataCentersByLinuxCount;//seconds tree houses id's of data centers
+    AVLTree<int, AVLTree<int,int>*> _dataCentersByWindowsCount;
 }* DataCenterSystem;
 
 

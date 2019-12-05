@@ -83,7 +83,7 @@ public:
             delete root;
         }
     }
-
+    bool isEmpty();
     //auxiliary funcs to main funcs
     void insert(K key, D data);
     bool deleteKey(K key);
@@ -392,5 +392,11 @@ void AVLTree<K, D>::changeNode(AVLNode* parent, AVLNode* oldNode, AVLNode* newNo
     else if (parent->leftSon == oldNode) parent->leftSon = newNode;
     else parent->rightSon = newNode;
 }
+template<class K, class D>
+bool AVLTree<K, D>::isEmpty()
+{
+    return this->root == NULL;
+}
+
 
 #endif //AVLTREE_AVLTREE_H
