@@ -3,13 +3,13 @@
 #include "AVLtree.h"
 typedef struct _dataCenterSystem
 {
-    AVLTree<int, DataCenter> _dataCentersById;
-    AVLTree<int, DataCenter> _dataCentersByLinuxCount;
-    AVLTree<int, DataCenter> _dataCentersByWindowsCount;
+    AVLTree<int, DataCenter*> _dataCentersById;
+    AVLTree<int, DataCenter*> _dataCentersByLinuxCount;
+    AVLTree<int, DataCenter*> _dataCentersByWindowsCount;
 }* DataCenterSystem;
 
 
-void * Init();//initializes the dataCenterSystem
+void * Init();//initializes the dataCenterSystem 
 
 StatusType AddDataCenter(void *DS, int dataCenterID, int numOfServers);
 

@@ -2,20 +2,19 @@
 #include"DataCenter.h"
 #include"List.h"
 
-DataCenter DataCenter::dataCenterInit(int servers, int dataCenterID) {
-    DataCenter* dc = new DataCenter();
-    dc->dataCenterID = dataCenterID;
-    dc->linuxServerCounter = servers;
-    dc->windowsServerCounter = 0;
+DataCenter::DataCenter(int servers, int dataCenterID) {
+    this->dataCenterID = dataCenterID;
+    this->linuxServerCounter = servers;
+    this->windowsServerCounter = 0;
+    this->arrayServersPointers = new _node<Server>*[servers];
     for (int i = 0; i < servers; i++)
     {
         Server* temp = new Server();
-        temp->OS = dc->linuxFree;
+        temp->OS = this->linuxFree;
         temp->serverID = i;
-        dc->arrayServersPointers[i] = createNode(*temp);
-        addNode(&(dc->linuxFree), dc->arrayServersPointers[i]);
+        this->arrayServersPointers[i] = createNode(*temp);
+        addNode(&(this->linuxFree), this->arrayServersPointers[i]);
     }
-    return *dc;
 }
 
 void removeList( _node<Server>* toRemove) {
@@ -27,13 +26,12 @@ void removeList( _node<Server>* toRemove) {
     }
 }
 
-void DataCenter::dataCenterRemove(DataCenter toRemove) {
-    removeList(toRemove.windowsFree);
-    removeList(toRemove.windowsUsed);
-    removeList(toRemove.linuxFree);
-    removeList(toRemove.linuxUsed);
-    delete(toRemove.arrayServersPointers);
-    delete(&toRemove);
+DataCenter::~DataCenter() {
+    removeList(this->windowsFree);
+    removeList(this->windowsUsed);
+    removeList(this->linuxFree);
+    removeList(this->linuxUsed);
+    delete(this->arrayServersPointers);
 }
 
 StatusType requestWindows(DataCenter toRequest, int serverID, int *assignedID) {
@@ -134,39 +132,39 @@ StatusType requestLinux(DataCenter toRequest, int serverID, int *assignedID) {
     return FAILURE; //no available servers
 }
 
-StatusType DataCenter::dataCenterRequestServer(DataCenter toRequest, int serverID, int os, int *assignedID) {
-    if (serverID >= toRequest.windowsServerCounter + toRequest.linuxServerCounter) return INVALID_INPUT;
-    return (os == 0) ?  requestLinux(toRequest,serverID,assignedID) : requestWindows(toRequest,serverID,assignedID);
+StatusType DataCenter::dataCenterRequestServer(int serverID, int os, int *assignedID) {
+    if (serverID >= this->windowsServerCounter + this->linuxServerCounter) return INVALID_INPUT;
+    return (os == 0) ?  requestLinux(*this, serverID,assignedID) : requestWindows(*this ,serverID,assignedID);
 }
 
-StatusType DataCenter::dataCenterFreeServer(DataCenter toFree, int serverID) {
-    if (serverID >= toFree.windowsServerCounter + toFree.linuxServerCounter) return INVALID_INPUT;
-    if ((toFree.arrayServersPointers[serverID]->value.OS == toFree.linuxFree) ||
-        (toFree.arrayServersPointers[serverID]->value.OS == toFree.windowsFree)) return FAILURE;
-    _node<Server> *originalPtr = toFree.arrayServersPointers[serverID];
-    if (toFree.arrayServersPointers[serverID]->value.OS == toFree.linuxUsed) {
-        toFree.arrayServersPointers[serverID] = createNode(getValue(toFree.arrayServersPointers[serverID]));
-        addNode(&(toFree.linuxFree), toFree.arrayServersPointers[serverID]);
-        removeNode(&(toFree.linuxUsed), originalPtr);
-        toFree.arrayServersPointers[serverID]->value.OS = toFree.linuxFree;
+StatusType DataCenter::dataCenterFreeServer(int serverID) {
+    if (serverID >= this->windowsServerCounter + this->linuxServerCounter) return INVALID_INPUT;
+    if ((this->arrayServersPointers[serverID]->value.OS == this->linuxFree) ||
+        (this->arrayServersPointers[serverID]->value.OS == this->windowsFree)) return FAILURE;
+    _node<Server> *originalPtr = this->arrayServersPointers[serverID];
+    if (this->arrayServersPointers[serverID]->value.OS == this->linuxUsed) {
+        this->arrayServersPointers[serverID] = createNode(getValue(this->arrayServersPointers[serverID]));
+        addNode(&(this->linuxFree), this->arrayServersPointers[serverID]);
+        removeNode(&(this->linuxUsed), originalPtr);
+        this->arrayServersPointers[serverID]->value.OS = this->linuxFree;
         return  SUCCESS;
     }
-    else if (toFree.arrayServersPointers[serverID]->value.OS == toFree.windowsUsed) {
-        toFree.arrayServersPointers[serverID] = createNode(getValue(toFree.arrayServersPointers[serverID]));
-        addNode(&(toFree.windowsFree), toFree.arrayServersPointers[serverID]);
-        removeNode(&(toFree.windowsUsed), originalPtr);
-        toFree.arrayServersPointers[serverID]->value.OS = toFree.linuxFree;
+    else if (this->arrayServersPointers[serverID]->value.OS == this->windowsUsed) {
+        this->arrayServersPointers[serverID] = createNode(getValue(this->arrayServersPointers[serverID]));
+        addNode(&(this->windowsFree), this->arrayServersPointers[serverID]);
+        removeNode(&(this->windowsUsed), originalPtr);
+        this->arrayServersPointers[serverID]->value.OS = this->linuxFree;
         return  SUCCESS;
     }
     return FAILURE;
 }
 
-int DataCenter::getLinuxCounter(DataCenter dataCenter) {
-    return dataCenter.linuxServerCounter;
+int DataCenter::getLinuxCounter()) {
+    return this->linuxServerCounter;
 }
 
 int DataCenter::getWindowsCounter(DataCenter dataCenter) {
-    return dataCenter.windowsServerCounter;
+    return this->windowsServerCounter;
 }
 
 

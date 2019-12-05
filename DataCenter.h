@@ -26,12 +26,12 @@ public:
     _node<Server>* windowsUsed;
     _node<Server>* linuxFree;
     _node<Server>* linuxUsed;
-    DataCenter dataCenterInit(int servers, int dataCenterID);//servers:amount of servers
-    void dataCenterRemove(DataCenter toRemove);
-    StatusType dataCenterRequestServer(DataCenter toRequest, int serverID, int os, int* assigned);
-    StatusType dataCenterFreeServer(DataCenter toFree, int serverID);
-    int getLinuxCounter(DataCenter dataCenter);
-    int getWindowsCounter(DataCenter dataCenter);
+    DataCenter(int servers, int dataCenterID);//servers:amount of servers
+    ~DataCenter();
+    StatusType dataCenterRequestServer(int serverID, int os, int* assigned);
+    StatusType dataCenterFreeServer(int serverID);
+    int getLinuxCounter();
+    int getWindowsCounter();
 };
 
 
