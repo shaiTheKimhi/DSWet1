@@ -18,6 +18,8 @@ void addNode(_node<T>** head, _node<T>* n);
 template <typename T>
 void removeNode(_node<T>** head, _node<T>* node);
 template <typename T>
+void addNode(_node<T>** head, _node<T>* n, _node<T>** tail)
+template <typename T>
 _node<T>* getNext(_node<T>* node);
 template <typename T>
 _node<T>* getPrevious(_node<T>* node);
@@ -62,6 +64,21 @@ void removeNode(_node<T>** head, _node<T>* node)
     if (node->_prev)
         node->_prev->_next = node->_next;
     free(node);
+}
+template <typename T>
+void addNode(_node<T>** head,_node<T>* n, _node<T>** tail)
+{
+    if (!n || !tail || !head)
+        return;
+    if (!(*tail)) {
+        *tail = n;
+        *head = *tail;
+        return;
+    }
+    (*tail)->_next = n;
+    n->_prev = (*tail);
+    n->_next = 0;
+    (*tail) = n;
 }
 template <typename T>
 _node<T>* getNext(_node<T>* node)
