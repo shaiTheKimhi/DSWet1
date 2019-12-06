@@ -1,6 +1,5 @@
 #pragma once
 #include"DataCenter.h"
-#include "AVLTree.h"
 
 class DataCenterSystem{
 public:

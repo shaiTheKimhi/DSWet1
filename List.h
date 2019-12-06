@@ -35,8 +35,8 @@ template<typename T>
 _node<T> *createNode(T value) {
     _node<T> *t = (_node<T> *) malloc(sizeof(_node<T>));
     t->value = value;
-    t->_prev = 0;
-    t->_next = 0;
+    t->_prev = nullptr;
+    t->_next = nullptr;
     return t;
 }
 

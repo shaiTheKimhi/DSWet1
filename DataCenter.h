@@ -1,6 +1,7 @@
 #pragma once
 
 #include "List.h"
+#include "AVLTree.h"
 
 
 typedef enum {
@@ -18,9 +19,7 @@ public:
 
 
 class DataCenter {
-    StatusType requestWindows(int server, int *assignedID);
 
-    StatusType requestLinux(int server, int *assignedID);
 
 public:
     int dataCenterID;
@@ -35,15 +34,23 @@ public:
     DataCenter(int servers, int dataCenterID);//servers:amount of servers
     ~DataCenter();
 
-    StatusType dataCenterRequestServer(int serverID, int os, int *assigned);
+    StatusType dataCenterRequestServer(int serverID, int os, int *assigned,AVLTree<int, AVLTree<int,int>*> treeLinux,AVLTree<int, AVLTree<int,int>*> treeWindows);
 
     StatusType dataCenterFreeServer(int serverID);
+
+    StatusType requestWindows(int server, int *assignedID,AVLTree<int, AVLTree<int,int>*> treeLinux,AVLTree<int, AVLTree<int,int>*> treeWindows);
+
+    StatusType requestLinux(int server, int *assignedID,AVLTree<int, AVLTree<int,int>*> treeLinux,AVLTree<int, AVLTree<int,int>*> treeWindows);
 
     int getLinuxCounter();
 
     int getWindowsCounter();
 
     void usingFreeServer(int *assignedID, _node<Server> *freeServers, _node<Server> *usedServer);
+
+    void addDSToCountTree(AVLTree<int, AVLTree<int, int> *> tree, int counter, int id);
+
+    void removeDSFromCountTree(AVLTree<int, AVLTree<int, int> *> tree, int counter, int id);
 };
 
 

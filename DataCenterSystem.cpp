@@ -5,11 +5,14 @@
 
 void *Init() {
     DataCenterSystem *ds = new DataCenterSystem();
+    ds->_dataCentersById= AVLTree<int, DataCenter*>();
+    ds->_dataCentersByWindowsCount = AVLTree<int, AVLTree<int,int>*>();
+    ds->_dataCentersByLinuxCount = AVLTree<int, AVLTree<int,int>*>();
     return (void *) ds;
 }
 
 StatusType AddDataCenter(void *DS, int dataCenterID, int numOfServers) {
-    if (numOfServers <= 0 || DS == NULL || dataCenterID <= 0) {
+    if (numOfServers <= 0 || DS == nullptr || dataCenterID <= 0) {
         return INVALID_INPUT;
     }
 
@@ -51,8 +54,7 @@ StatusType RemoveDataCenter(void *DS, int dataCenterID) {
 
     DataCenter *dc = ds->_dataCentersById.findAVLNode(dataCenterID)->getData();
     ds->_dataCentersById.deleteKey(dataCenterID);
-    ds->_dataCentersByLinuxCount.findAVLNode(dc->getLinuxCounter())->getData();
-
+    ds->_dataCentersByLinuxCount.findAVLNode(dc->getLinuxCounter())->getData()->deleteKey(dataCenterID);
 
     AVLTree<int, int> *linuxTree = ds->_dataCentersByLinuxCount.findAVLNode(dc->getLinuxCounter())->getData();
     linuxTree->deleteKey(dataCenterID);
@@ -71,10 +73,10 @@ StatusType RemoveDataCenter(void *DS, int dataCenterID) {
 }
 
 StatusType RequestServer(void *DS, int dataCenterID, int serverID, int os, int *assignedID) {
-    if (DS == NULL || dataCenterID <= 0 || os < 0 || os > 1 || assignedID == NULL || serverID < 0)
+    if (DS == nullptr || dataCenterID <= 0 || os < 0 || os > 1 || assignedID == nullptr || serverID < 0)
         return INVALID_INPUT;
     DataCenterSystem *ds = (DataCenterSystem *) DS;
-    if (ds->_dataCentersById.findAVLNode(dataCenterID) == NULL)
+    if (ds->_dataCentersById.findAVLNode(dataCenterID) == nullptr)
         return FAILURE;
     DataCenter *dc = ds->_dataCentersById.findAVLNode(dataCenterID)->getData();
     int totalServerCount = dc->getLinuxCounter() + dc->getWindowsCounter();
@@ -83,7 +85,7 @@ StatusType RequestServer(void *DS, int dataCenterID, int serverID, int os, int *
     }
 
     int linuxCount = dc->getLinuxCounter(), windowsCount = dc->getWindowsCounter();
-    dc->dataCenterRequestServer(serverID, os, assignedID);
+    dc->dataCenterRequestServer(serverID, os, assignedID, ds->_dataCentersByLinuxCount, ds->_dataCentersByWindowsCount);
 
     //updating linux and windows avls:
     int diff = dc->getLinuxCounter() - linuxCount;

@@ -81,6 +81,7 @@ public:
     void insert(K key, D data);
     bool deleteKey(K key);
     bool isExist(K key) const;
+    bool isExist(K key);
 
     void changeData(K key, D new_data);
     void destroyData();
@@ -367,6 +368,12 @@ void AVLTree<K, D>::deleteNode(AVLNode* toDelete) {
 }
 template<class K, class D>
 bool AVLTree<K, D>::isExist(K key) const {
+    AVLNode* current = findAVLNode(key);
+    return (current != NULL);
+}
+
+template<class K, class D>
+bool AVLTree<K, D>::isExist(K key) {
     AVLNode* current = findAVLNode(key);
     return (current != NULL);
 }
