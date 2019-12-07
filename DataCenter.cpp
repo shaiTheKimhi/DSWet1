@@ -2,7 +2,7 @@
 #include"DataCenter.h"
 #include"List.h"
 
-DataCenter::DataCenter(int servers, int dataCenterID) {
+DataCenter::DataCenter(int servers, int dataCenterID, AVLTree<int, AVLTree<int,int>*>* treeLinux, AVLTree<int, AVLTree<int,int>*>* treeWindows) {
     this->dataCenterID = dataCenterID;
     this->linuxServerCounter = servers;
     this->windowsServerCounter = 0;
@@ -15,6 +15,8 @@ DataCenter::DataCenter(int servers, int dataCenterID) {
         Server *temp = new Server(linuxFree,i);
         this->arrayServersPointers[i] = linuxFree->appendNode(*temp);
     }
+    addDSToCountTree(treeLinux,this->linuxServerCounter, dataCenterID);
+    addDSToCountTree(treeWindows, this->windowsServerCounter, dataCenterID);
 }
 
 DataCenter::~DataCenter() {
@@ -23,6 +25,7 @@ DataCenter::~DataCenter() {
     delete(this->linuxFree);
     delete(this->linuxUsed);
     delete[](this->arrayServersPointers);
+
 }
 
 StatusType DataCenter::requestWindows(int serverID, int *assignedID,AVLTree<int, AVLTree<int,int>*>* treeLinux,AVLTree<int, AVLTree<int,int>*>* treeWindows) {
@@ -52,11 +55,6 @@ StatusType DataCenter::requestWindows(int serverID, int *assignedID,AVLTree<int,
         return SUCCESS;
     }
     return FAILURE;
-}
-
-
-
-void DataCenter::usingFreeServer(int *assignedID, List<Server> *freeServers, Node<Server> *usedServer) {
 }
 
 void DataCenter::removeDSFromCountTree(AVLTree<int, AVLTree<int,int>*>* tree, int oldServersAmount, int dataCenterID) {

@@ -31,7 +31,7 @@ public:
     List<Server>* linuxFree;
     List<Server>* linuxUsed;
 
-    DataCenter(int servers, int dataCenterID);
+    DataCenter(int servers, int dataCenterID, AVLTree<int, AVLTree<int,int>*>* treeLinux, AVLTree<int, AVLTree<int,int>*>* treeWindows);
     ~DataCenter();
 
     StatusType dataCenterRequestServer(int serverID, int os, int *assigned,AVLTree<int, AVLTree<int,int>*>* treeLinux,AVLTree<int, AVLTree<int,int>*>* treeWindows);

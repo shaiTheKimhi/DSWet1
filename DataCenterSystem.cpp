@@ -21,52 +21,36 @@ StatusType AddDataCenter(void *DS, int dataCenterID, int numOfServers) {
         return FAILURE;
     }
 
-    DataCenter *dc = new DataCenter(numOfServers, dataCenterID);
-
+    DataCenter *dc = new DataCenter(numOfServers, dataCenterID,&(ds->_dataCentersByLinuxCount), &(ds->_dataCentersByWindowsCount));
     ds->_dataCentersById.insert(dataCenterID, dc);
-
-    if (ds->_dataCentersByLinuxCount.findAVLNode(numOfServers) != NULL) {
-        AVLTree<int, int> *t = ds->_dataCentersByLinuxCount.findAVLNode(numOfServers)->getData();
-        t->insert(dataCenterID, dataCenterID);
-    } else {
-        AVLTree<int, int> *t = new AVLTree<int, int>();
-        t->insert(dataCenterID, dataCenterID);
-        ds->_dataCentersByLinuxCount.insert(numOfServers, t);
-    }
-    if (ds->_dataCentersByWindowsCount.findAVLNode(numOfServers) != NULL) {
-        AVLTree<int, int> *t = ds->_dataCentersByWindowsCount.findAVLNode(numOfServers)->getData();
-        t->insert(dataCenterID, dataCenterID);
-    } else {
-        AVLTree<int, int> *t = new AVLTree<int, int>();
-        t->insert(dataCenterID, dataCenterID);
-        ds->_dataCentersByWindowsCount.insert(0, t);
-    }
     return SUCCESS;
 }
 
 StatusType RemoveDataCenter(void *DS, int dataCenterID) {
-    if (DS == NULL || dataCenterID <= 0)
+    if (DS == nullptr || dataCenterID <= 0) {
         return INVALID_INPUT;
+    }
 
     DataCenterSystem *ds = (DataCenterSystem *) DS;
-    if (ds->_dataCentersById.findAVLNode(dataCenterID) == NULL)
+    if (!(ds->_dataCentersById.isExist(dataCenterID))) {
         return FAILURE;
+    }
 
     DataCenter *dc = ds->_dataCentersById.findAVLNode(dataCenterID)->getData();
     ds->_dataCentersById.deleteKey(dataCenterID);
-    ds->_dataCentersByLinuxCount.findAVLNode(dc->getLinuxCounter())->getData()->deleteKey(dataCenterID);
-
-    AVLTree<int, int> *linuxTree = ds->_dataCentersByLinuxCount.findAVLNode(dc->getLinuxCounter())->getData();
-    linuxTree->deleteKey(dataCenterID);
-    if (linuxTree->isEmpty()) {//needs to have to ability to check if tree is empty
-        delete linuxTree;
-        ds->_dataCentersByLinuxCount.deleteKey(dc->getLinuxCounter());
+    if (ds->_dataCentersByLinuxCount.isExist(dc->linuxServerCounter)) {
+        AVLTree<int,int>* linuxCounterTreeID =  ds->_dataCentersByLinuxCount.findAVLNode(dc->getLinuxCounter())->getData();
+        linuxCounterTreeID->deleteKey(dataCenterID);
+        if (linuxCounterTreeID->isEmpty()) {
+            ds->_dataCentersByLinuxCount.deleteKey(dc->linuxServerCounter);
+        }
     }
-    AVLTree<int, int> *windowsTree = ds->_dataCentersByWindowsCount.findAVLNode(dc->getWindowsCounter())->getData();
-    windowsTree->deleteKey(dataCenterID);
-    if (windowsTree->isEmpty()) {
-        delete windowsTree;
-        ds->_dataCentersByWindowsCount.deleteKey(dc->getWindowsCounter());
+    if (ds->_dataCentersByWindowsCount.isExist(dc->windowsServerCounter)) {
+        AVLTree<int,int>* windowsCounterTreeID =  ds->_dataCentersByWindowsCount.findAVLNode(dc->getWindowsCounter())->getData();
+        windowsCounterTreeID->deleteKey(dataCenterID);
+        if (windowsCounterTreeID->isEmpty()) {
+            ds->_dataCentersByWindowsCount.deleteKey(dc->windowsServerCounter);
+        }
     }
     delete dc;
     return SUCCESS;
