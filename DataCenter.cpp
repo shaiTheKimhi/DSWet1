@@ -72,7 +72,7 @@ void DataCenter::removeDSFromCountTree(AVLTree<int, AVLTree<int,int>*>* tree, in
 }
 
 void DataCenter::addDSToCountTree(AVLTree<int, AVLTree<int,int>*>* tree, int newServersAmount, int dataCenterID) {
-    if (tree->isExist(newServersAmount)) {
+    if (tree != nullptr && tree->isExist(newServersAmount)) {
         AVLTree<int,int>* iDsTree = tree->findAVLNode(newServersAmount)->getData();
         iDsTree->insert(dataCenterID,0);
     }

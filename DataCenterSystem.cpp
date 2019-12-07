@@ -10,12 +10,10 @@ DataCenterSystem::~DataCenterSystem() {
     delete (this->_dataCentersById);
     this->_dataCentersById = nullptr;
 }
-void* DataCenterSystem::Init() {
-    DataCenterSystem *ds = new DataCenterSystem();
-    ds->_dataCentersById = new AVLTree<int, DataCenter*>();
-    ds->_dataCentersByWindowsCount = new AVLTree<int, AVLTree<int,int>*>();
-    ds->_dataCentersByLinuxCount = new AVLTree<int, AVLTree<int,int>*>();
-    return (void *) ds;
+void DataCenterSystem::Init() {
+    this->_dataCentersById = new AVLTree<int, DataCenter*>();
+    this->_dataCentersByWindowsCount = new AVLTree<int, AVLTree<int,int>*>();
+    this->_dataCentersByLinuxCount = new AVLTree<int, AVLTree<int,int>*>();
 }
 
 void DataCenterSystem::Quit(void** DS) {
@@ -26,45 +24,43 @@ void DataCenterSystem::Quit(void** DS) {
     *DS = nullptr;
 }
 
-StatusType DataCenterSystem::AddDataCenter(void *DS, int dataCenterID, int numOfServers) {
-    if (numOfServers <= 0 || DS == nullptr || dataCenterID <= 0) {
+StatusType DataCenterSystem::AddDataCenter(int dataCenterID, int numOfServers) {
+    if (numOfServers <= 0 || dataCenterID <= 0) {
         return INVALID_INPUT;
     }
-
-    DataCenterSystem *ds = (DataCenterSystem *) DS;
-    if (ds->_dataCentersById->findAVLNode(dataCenterID) != nullptr) {
-        return FAILURE;
+    if (this->_dataCentersById != nullptr){
+        if (this->_dataCentersById->findAVLNode(dataCenterID) != nullptr) {
+            return FAILURE;
+        }
     }
 
-    DataCenter *dc = new DataCenter(numOfServers, dataCenterID,ds->_dataCentersByLinuxCount, ds->_dataCentersByWindowsCount);
-    ds->_dataCentersById->insert(dataCenterID, dc);
+    DataCenter *dc = new DataCenter(numOfServers, dataCenterID,this->_dataCentersByLinuxCount, this->_dataCentersByWindowsCount);
+    this->_dataCentersById->insert(dataCenterID, dc);
     return SUCCESS;
 }
 
-StatusType DataCenterSystem::RemoveDataCenter(void *DS, int dataCenterID) {
-    if (DS == nullptr || dataCenterID <= 0) {
+StatusType DataCenterSystem::RemoveDataCenter(int dataCenterID) {
+    if (dataCenterID <= 0) {
         return INVALID_INPUT;
     }
-
-    DataCenterSystem *ds = (DataCenterSystem *) DS;
-    if (!(ds->_dataCentersById->isExist(dataCenterID))) {
+    if (!(this->_dataCentersById->isExist(dataCenterID))) {
         return FAILURE;
     }
 
-    DataCenter *dc = ds->_dataCentersById->findAVLNode(dataCenterID)->getData();
-    ds->_dataCentersById->deleteKey(dataCenterID);
-    if (ds->_dataCentersByLinuxCount->isExist(dc->linuxServerCounter)) {
-        AVLTree<int,int>* linuxCounterTreeID =  ds->_dataCentersByLinuxCount->findAVLNode(dc->getLinuxCounter())->getData();
+    DataCenter *dc = this->_dataCentersById->findAVLNode(dataCenterID)->getData();
+    this->_dataCentersById->deleteKey(dataCenterID);
+    if (this->_dataCentersByLinuxCount->isExist(dc->linuxServerCounter)) {
+        AVLTree<int,int>* linuxCounterTreeID =  this->_dataCentersByLinuxCount->findAVLNode(dc->getLinuxCounter())->getData();
         linuxCounterTreeID->deleteKey(dataCenterID);
         if (linuxCounterTreeID->isEmpty()) {
-            ds->_dataCentersByLinuxCount->deleteKey(dc->linuxServerCounter);
+            this->_dataCentersByLinuxCount->deleteKey(dc->linuxServerCounter);
         }
     }
-    if (ds->_dataCentersByWindowsCount->isExist(dc->windowsServerCounter)) {
-        AVLTree<int,int>* windowsCounterTreeID =  ds->_dataCentersByWindowsCount->findAVLNode(dc->getWindowsCounter())->getData();
+    if (this->_dataCentersByWindowsCount->isExist(dc->windowsServerCounter)) {
+        AVLTree<int,int>* windowsCounterTreeID =  this->_dataCentersByWindowsCount->findAVLNode(dc->getWindowsCounter())->getData();
         windowsCounterTreeID->deleteKey(dataCenterID);
         if (windowsCounterTreeID->isEmpty()) {
-            ds->_dataCentersByWindowsCount->deleteKey(dc->windowsServerCounter);
+            this->_dataCentersByWindowsCount->deleteKey(dc->windowsServerCounter);
         }
     }
     delete dc;
@@ -72,43 +68,40 @@ StatusType DataCenterSystem::RemoveDataCenter(void *DS, int dataCenterID) {
     return SUCCESS;
 }
 
-StatusType DataCenterSystem::RequestServer(void *DS, int dataCenterID, int serverID, int os, int *assignedID) {
-    if (DS == nullptr || dataCenterID <= 0 || os < 0 || os > 1 || assignedID == nullptr || serverID < 0) {
+StatusType DataCenterSystem::RequestServer(int dataCenterID, int serverID, int os, int *assignedID) {
+    if (dataCenterID <= 0 || os < 0 || os > 1 || assignedID == nullptr || serverID < 0) {
         return INVALID_INPUT;
     }
-    DataCenterSystem *ds = (DataCenterSystem *) DS;
-    if ((!ds->_dataCentersById->isExist(dataCenterID))) {
+    if ((!this->_dataCentersById->isExist(dataCenterID))) {
         return FAILURE;
     }
-    DataCenter *dc = ds->_dataCentersById->findAVLNode(dataCenterID)->getData();
-    return dc->dataCenterRequestServer(serverID, os, assignedID, ds->_dataCentersByLinuxCount, ds->_dataCentersByWindowsCount);
+    DataCenter *dc = this->_dataCentersById->findAVLNode(dataCenterID)->getData();
+    return dc->dataCenterRequestServer(serverID, os, assignedID, this->_dataCentersByLinuxCount, this->_dataCentersByWindowsCount);
 }
 
-StatusType DataCenterSystem::FreeServer(void *DS, int dataCenterID, int serverID) {
-    if (DS == nullptr || dataCenterID <= 0 || serverID < 0)
+StatusType DataCenterSystem::FreeServer(int dataCenterID, int serverID) {
+    if (dataCenterID <= 0 || serverID < 0)
         return INVALID_INPUT;
-    DataCenterSystem *ds = (DataCenterSystem*) DS;
-    if (ds->_dataCentersById->findAVLNode(dataCenterID) == nullptr)
+    if (this->_dataCentersById->findAVLNode(dataCenterID) == nullptr)
         return FAILURE;
-    DataCenter *dc = ds->_dataCentersById->findAVLNode(dataCenterID)->getData();
+    DataCenter *dc = this->_dataCentersById->findAVLNode(dataCenterID)->getData();
     return dc->dataCenterFreeServer(serverID);
 }
 
-StatusType DataCenterSystem::GetDataCentersByOS(void* DS, int os, int **dataCenters, int* numOfDataCenters) {
-    if (DS == nullptr || dataCenters == nullptr || numOfDataCenters == nullptr || os > 1 || os <0 ) {
+StatusType DataCenterSystem::GetDataCentersByOS(int os, int **dataCenters, int* numOfDataCenters) {
+    if (dataCenters == nullptr || numOfDataCenters == nullptr || os > 1 || os <0 ) {
         return INVALID_INPUT;
     }
-    DataCenterSystem *ds = (DataCenterSystem*) DS;
-    if (ds->_dataCentersById->isEmpty()) {
+
+    if (this->_dataCentersById->isEmpty()) {
         return FAILURE;
     }
 
-    //writing for linux only- change later
-    AVLTree<int,int>** tempArray = (os == 0) ? ds->_dataCentersByLinuxCount->inOrderDataArray(0) : ds->_dataCentersByWindowsCount->inOrderDataArray(0) ;
+    AVLTree<int,int>** tempArray = (os == 0) ? this->_dataCentersByLinuxCount->inOrderDataArray() : this->_dataCentersByWindowsCount->inOrderDataArray() ;
     if (tempArray == nullptr) {
         return ALLOCATION_ERROR;
     }
-    int tempArraySize = (os == 0) ? ds->_dataCentersByLinuxCount->getSize() :ds->_dataCentersByWindowsCount->getSize() ;
+    int tempArraySize = (os == 0) ? this->_dataCentersByLinuxCount->getSize() : this->_dataCentersByWindowsCount->getSize() ;
     List<AVLTree<int,int>*>* tempList = new List<AVLTree<int,int>*>();
     for (int i = 0; i < tempArraySize; i++) {
         tempList->addNode(tempArray[i]);

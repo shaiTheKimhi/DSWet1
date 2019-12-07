@@ -163,7 +163,7 @@ public:
         return NULL;
     }
 
-    D* inOrderDataArray(K k) {
+    D* inOrderDataArray() {
         D* inOrderData;
         inOrderData =  (D*)malloc(size*sizeof(*inOrderData));
         if (inOrderData) {

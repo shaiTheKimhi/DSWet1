@@ -8,17 +8,17 @@ public:
     AVLTree<int, AVLTree<int,int>*>* _dataCentersByWindowsCount;
 
     ~DataCenterSystem();
-    void * Init();//initializes the dataCenterSystem
+    void Init();//initializes the dataCenterSystem
 
-    StatusType AddDataCenter(void *DS, int dataCenterID, int numOfServers);
+    StatusType AddDataCenter(int dataCenterID, int numOfServers);
 
-    StatusType RemoveDataCenter(void *DS, int dataCenterID);
+    StatusType RemoveDataCenter( int dataCenterID);
 
-    StatusType RequestServer(void *DS, int dataCenterID, int serverID, int os, int *assignedID);
+    StatusType RequestServer(int dataCenterID, int serverID, int os, int *assignedID);
 
-    StatusType FreeServer(void *DS, int dataCenterID, int serverID);
+    StatusType FreeServer(int dataCenterID, int serverID);
 
-    StatusType GetDataCentersByOS(void *DS, int os, int **dataCenters, int* numOfDataCenters);
+    StatusType GetDataCentersByOS( int os, int **dataCenters, int* numOfDataCenters);
 
     void Quit(void **DS);
 };
