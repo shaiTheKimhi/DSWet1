@@ -2,13 +2,28 @@
 
 #include "DataCenterSystem.h"
 
-
+DataCenterSystem::~DataCenterSystem() {
+    delete (this->_dataCentersByLinuxCount);
+    this->_dataCentersByLinuxCount = nullptr;
+    delete(this->_dataCentersByWindowsCount);
+    this->_dataCentersByWindowsCount = nullptr;
+    delete (this->_dataCentersById);
+    this->_dataCentersById = nullptr;
+}
 void *Init() {
     DataCenterSystem *ds = new DataCenterSystem();
     ds->_dataCentersById = new AVLTree<int, DataCenter*>();
     ds->_dataCentersByWindowsCount = new AVLTree<int, AVLTree<int,int>*>();
     ds->_dataCentersByLinuxCount = new AVLTree<int, AVLTree<int,int>*>();
     return (void *) ds;
+}
+
+void Quit(void** DS) {
+    DataCenterSystem *ds = (DataCenterSystem *) *DS;
+    if (ds != nullptr) {
+        delete(ds);
+    }
+    *DS = nullptr;
 }
 
 StatusType AddDataCenter(void *DS, int dataCenterID, int numOfServers) {
@@ -78,3 +93,5 @@ StatusType FreeServer(void *DS, int dataCenterID, int serverID) {
     DataCenter *dc = ds->_dataCentersById->findAVLNode(dataCenterID)->getData();
     return dc->dataCenterFreeServer(serverID);
 }
+
+

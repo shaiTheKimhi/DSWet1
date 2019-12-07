@@ -7,12 +7,8 @@ public:
     AVLTree<int, AVLTree<int,int>*>* _dataCentersByLinuxCount;//seconds tree houses id's of data centers
     AVLTree<int, AVLTree<int,int>*>* _dataCentersByWindowsCount;
 
-
-
+    ~DataCenterSystem();
 };
-
-
-
 
 void * Init();//initializes the dataCenterSystem
 
