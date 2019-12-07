@@ -53,6 +53,7 @@ StatusType RemoveDataCenter(void *DS, int dataCenterID) {
         }
     }
     delete dc;
+    dc = nullptr;
     return SUCCESS;
 }
 

@@ -21,11 +21,15 @@ DataCenter::DataCenter(int servers, int dataCenterID, AVLTree<int, AVLTree<int,i
 
 DataCenter::~DataCenter() {
     delete(this->windowsFree);
+    this->windowsFree = nullptr;
     delete(this->windowsUsed);
+    this->windowsUsed = nullptr;
     delete(this->linuxFree);
+    this->linuxFree = nullptr;
     delete(this->linuxUsed);
+    this->linuxUsed = nullptr;
     delete[](this->arrayServersPointers);
-
+    this->arrayServersPointers = nullptr;
 }
 
 StatusType DataCenter::requestWindows(int serverID, int *assignedID,AVLTree<int, AVLTree<int,int>*>* treeLinux,AVLTree<int, AVLTree<int,int>*>* treeWindows) {
