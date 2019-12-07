@@ -16,7 +16,6 @@ DataCenter::DataCenter(int servers, int dataCenterID, AVLTree<int, AVLTree<int,i
         this->arrayServersPointers[i] = linuxFree->appendNode(*temp);
     }
     addDSToCountTree(treeLinux,this->linuxServerCounter, dataCenterID);
-    addDSToCountTree(treeWindows, this->windowsServerCounter, dataCenterID);
 }
 
 DataCenter::~DataCenter() {
@@ -127,7 +126,9 @@ void DataCenter::updateTreesCount(AVLTree<int, AVLTree<int,int>*>* treeAdded , A
     (*counterAdded)++;
     (*counterRemoved)--;
     addDSToCountTree(treeAdded, *counterAdded, dataCenterID);
-    addDSToCountTree(treeRemoved, *counterRemoved, dataCenterID);
+    if ((*counterRemoved) != 0) {
+        addDSToCountTree(treeRemoved, *counterRemoved, dataCenterID);
+    }
 }
 
 StatusType DataCenter::dataCenterRequestServer(int serverID, int os, int *assignedID,AVLTree<int, AVLTree<int,int>*>* treeLinux,AVLTree<int, AVLTree<int,int>*>* treeWindows) {

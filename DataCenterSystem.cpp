@@ -104,11 +104,11 @@ StatusType GetDataCentersByOS(void* DS, int os, int **dataCenters, int* numOfDat
     }
 
     //writing for linux only- change later
-    AVLTree<int,int>** tempArray = ds->_dataCentersByLinuxCount->inOrderDataArray();
+    AVLTree<int,int>** tempArray = (os == 0) ? ds->_dataCentersByLinuxCount->inOrderDataArray(0) : ds->_dataCentersByWindowsCount->inOrderDataArray(0) ;
     if (tempArray == nullptr) {
         return ALLOCATION_ERROR;
     }
-    int tempArraySize = ds->_dataCentersByLinuxCount->getSize();
+    int tempArraySize = (os == 0) ? ds->_dataCentersByLinuxCount->getSize() :ds->_dataCentersByWindowsCount->getSize() ;
     List<AVLTree<int,int>*>* tempList = new List<AVLTree<int,int>*>();
     for (int i = 0; i < tempArraySize; i++) {
         tempList->addNode(tempArray[i]);
@@ -141,7 +141,7 @@ StatusType GetDataCentersByOS(void* DS, int os, int **dataCenters, int* numOfDat
         dataCentersTemp[i] = idToEnter;
         resultList->removeNode(resultList->head);
     }
-    dataCenters=&dataCentersTemp;
+    *dataCenters= dataCentersTemp;
     return SUCCESS;
 }
 

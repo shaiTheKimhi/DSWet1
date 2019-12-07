@@ -163,9 +163,9 @@ public:
         return NULL;
     }
 
-    D* inOrderDataArray() {
+    D* inOrderDataArray(K k) {
         D* inOrderData;
-        inOrderData = (D*)malloc(size*sizeof(*inOrderData));
+        inOrderData =  (D*)malloc(size*sizeof(*inOrderData));
         if (inOrderData) {
             AVLNode* nodes[size];
             int i = 0;
