@@ -13,44 +13,51 @@ typedef enum {
 
 class Server {
 public:
-    _node<Server> *OS;//changed from <_server>
+    List<Server> *OS;
     int serverID;
+
+    Server(List<Server> *OS, int serverID): OS(OS),serverID(serverID){};
 };
 
 
 class DataCenter {
-
-
 public:
     int dataCenterID;
     int windowsServerCounter;
     int linuxServerCounter;
-    _node<Server> **arrayServersPointers;//changed from Server**(_server***)
-    _node<Server> *windowsFree;
-    _node<Server> *windowsUsed;
-    _node<Server> *linuxFree;
-    _node<Server> *linuxUsed;
+    Node<Server> **arrayServersPointers;
+    List<Server>* windowsFree;
+    List<Server>* windowsUsed;
+    List<Server>* linuxFree;
+    List<Server>* linuxUsed;
 
-    DataCenter(int servers, int dataCenterID);//servers:amount of servers
+    DataCenter(int servers, int dataCenterID);
     ~DataCenter();
 
-    StatusType dataCenterRequestServer(int serverID, int os, int *assigned,AVLTree<int, AVLTree<int,int>*> treeLinux,AVLTree<int, AVLTree<int,int>*> treeWindows);
+    StatusType dataCenterRequestServer(int serverID, int os, int *assigned,AVLTree<int, AVLTree<int,int>*>* treeLinux,AVLTree<int, AVLTree<int,int>*>* treeWindows);
 
     StatusType dataCenterFreeServer(int serverID);
 
-    StatusType requestWindows(int server, int *assignedID,AVLTree<int, AVLTree<int,int>*> treeLinux,AVLTree<int, AVLTree<int,int>*> treeWindows);
+    StatusType requestWindows(int server, int *assignedID,AVLTree<int, AVLTree<int,int>*>* treeLinux,AVLTree<int, AVLTree<int,int>*>* treeWindows);
 
-    StatusType requestLinux(int server, int *assignedID,AVLTree<int, AVLTree<int,int>*> treeLinux,AVLTree<int, AVLTree<int,int>*> treeWindows);
+    StatusType requestLinux(int server, int *assignedID,AVLTree<int, AVLTree<int,int>*>* treeLinux,AVLTree<int, AVLTree<int,int>*>* treeWindows);
 
     int getLinuxCounter();
 
     int getWindowsCounter();
 
-    void usingFreeServer(int *assignedID, _node<Server> *freeServers, _node<Server> *usedServer);
+    void usingFreeServer(int *assignedID, List<Server> *freeServers, Node<Server> *usedServer);
 
-    void addDSToCountTree(AVLTree<int, AVLTree<int, int> *> tree, int counter, int id);
+    void addDSToCountTree(AVLTree<int, AVLTree<int, int> *>* tree, int counter, int id);
 
-    void removeDSFromCountTree(AVLTree<int, AVLTree<int, int> *> tree, int counter, int id);
+    void removeDSFromCountTree(AVLTree<int, AVLTree<int, int> *>* tree, int counter, int id);
+
+    void updateTreesCount(AVLTree<int, AVLTree<int, int> *>* treeAdded, AVLTree<int, AVLTree<int, int> *>* treeRemoved,
+                          int *counterAdded, int *counterRemoved);
+
+    void assignFromFree(int serverID, int *assignedID) const;
+
+    void assignServerFromFree(int serverID, int *assignedID, List<Server> *freeServer, List<Server> *usedServers);
 };
 
 

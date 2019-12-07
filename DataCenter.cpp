@@ -6,181 +6,149 @@ DataCenter::DataCenter(int servers, int dataCenterID) {
     this->dataCenterID = dataCenterID;
     this->linuxServerCounter = servers;
     this->windowsServerCounter = 0;
-    this->arrayServersPointers = new _node<Server> *[servers];
-    this->linuxUsed = nullptr;
-    this->windowsFree = nullptr;
-    this->windowsUsed = nullptr;
-    for (int i = 0; i < servers; i++) {
-        Server *temp = new Server();
-        if (i == 0) {
-            this->linuxFree = (createNode(*temp));
-            this->arrayServersPointers[i] = this->linuxFree;
-            this->arrayServersPointers[i]->value.OS = this->linuxFree;
-        } else {
-            this->arrayServersPointers[i] = createNode(*temp);
-            addNode(&(this->linuxFree), this->arrayServersPointers[i]);
-            this->arrayServersPointers[i]->value.OS = this->linuxFree;
-        }
-        temp->serverID = i;
-    }
-}
-
-void removeList(_node<Server> *toRemove) {
-    while (toRemove != nullptr) {
-        _node<Server> *next = getNext(toRemove);
-        removeNode(&toRemove, toRemove);
-        toRemove = next;
+    this->arrayServersPointers = new Node<Server> *[servers];
+    this->linuxUsed = new List<Server>();
+    this->windowsFree = new List<Server>();
+    this->windowsUsed = new List<Server>();
+    this->linuxFree = new List<Server>();
+    for (int i = 0 ; i < servers ; i++) {
+        Server *temp = new Server(linuxFree,i);
+        this->arrayServersPointers[i] = linuxFree->appendNode(*temp);
     }
 }
 
 DataCenter::~DataCenter() {
-    removeList(this->windowsFree);
-    removeList(this->windowsUsed);
-    removeList(this->linuxFree);
-    removeList(this->linuxUsed);
-    delete (this->arrayServersPointers);
+    delete(this->windowsFree);
+    delete(this->windowsUsed);
+    delete(this->linuxFree);
+    delete(this->linuxUsed);
+    delete[](this->arrayServersPointers);
 }
 
-StatusType DataCenter::requestWindows(int serverID, int *assignedID,AVLTree<int, AVLTree<int,int>*> treeLinux,AVLTree<int, AVLTree<int,int>*> treeWindows) {
-    _node<Server> *originalPtr = arrayServersPointers[serverID];
-
-
-    if (originalPtr->value.OS == windowsFree || originalPtr->value.OS == linuxFree) {
-        arrayServersPointers[serverID] = createNode(getValue(arrayServersPointers[serverID]));
-        addNode(&(windowsUsed), arrayServersPointers[serverID]);
-
-        if (originalPtr->value.OS == windowsFree) { //the request server is free
-            removeNode(&(windowsFree), originalPtr);
-            arrayServersPointers[serverID]->value.OS = windowsUsed;//downloading linux on the server & set it as used
-        }
-        if (originalPtr->value.OS == linuxFree) { //the request server is free with different os
-            removeNode(&(linuxFree), originalPtr);
-            (*(arrayServersPointers[serverID])).value.OS = windowsUsed;//downloading linux on the server & set it as used
-            removeDSFromCountTree(treeLinux, this->linuxServerCounter, this->dataCenterID);
-            removeDSFromCountTree(treeWindows, this->windowsServerCounter, this->dataCenterID);
-            linuxServerCounter--;
-            windowsServerCounter++;
-            addDSToCountTree(treeLinux, this->linuxServerCounter, this->dataCenterID);
-            addDSToCountTree(treeWindows, this->windowsServerCounter, this->dataCenterID);
+StatusType DataCenter::requestWindows(int serverID, int *assignedID,AVLTree<int, AVLTree<int,int>*>* treeLinux,AVLTree<int, AVLTree<int,int>*>* treeWindows) {
+    Node<Server>* originalPtr = this->arrayServersPointers[serverID];
+    if (originalPtr == nullptr) {
+        return FAILURE;
+    }
+    if(originalPtr->value.OS == linuxFree ||originalPtr->value.OS == windowsFree) {
+        Server *temp = new Server(windowsUsed,serverID);
+        arrayServersPointers[serverID] = windowsUsed->addNode(*temp);
+        if (originalPtr->value.OS == linuxFree) {
+            updateTreesCount(treeWindows, treeLinux, &windowsServerCounter, &linuxServerCounter);
+            linuxFree->removeNode(originalPtr);
+        } else {
+            windowsFree->removeNode(originalPtr);
         }
         *assignedID = serverID;
         return SUCCESS;
     }
+    if (!windowsFree->isEmpty()) {
+        assignServerFromFree(serverID, assignedID, windowsFree, windowsUsed);
+        return SUCCESS;
+    }
+    if (!linuxFree->isEmpty()) {
+        assignServerFromFree(serverID, assignedID, linuxFree, windowsUsed);
+        updateTreesCount(treeWindows, treeLinux, &windowsServerCounter, &linuxServerCounter);
+        return SUCCESS;
+    }
+    return FAILURE;
+}
 
-    if (originalPtr->value.OS == windowsUsed) { //the requested server is used
-        if (windowsFree) {
-            usingFreeServer(assignedID, windowsFree, windowsUsed);
-            return SUCCESS;
-        } else { //there is no available server with the requested OS
-            if (linuxFree) {
-                usingFreeServer(assignedID, linuxFree, windowsUsed);
-                removeDSFromCountTree(treeLinux, this->linuxServerCounter, this->dataCenterID);
-                removeDSFromCountTree(treeWindows, this->windowsServerCounter, this->dataCenterID);
-                linuxServerCounter--;
-                windowsServerCounter++;
-                addDSToCountTree(treeLinux, this->linuxServerCounter, this->dataCenterID);
-                addDSToCountTree(treeWindows, this->windowsServerCounter, this->dataCenterID);
-                return SUCCESS;
-            }
+
+
+void DataCenter::usingFreeServer(int *assignedID, List<Server> *freeServers, Node<Server> *usedServer) {
+}
+
+void DataCenter::removeDSFromCountTree(AVLTree<int, AVLTree<int,int>*>* tree, int oldServersAmount, int dataCenterID) {
+    if (tree->findAVLNode(oldServersAmount)){
+        AVLTree<int,int>* iDsTree = tree->findAVLNode(oldServersAmount)->getData();
+        iDsTree->deleteKey(dataCenterID);
+        if (iDsTree->getSize() == 0) {
+            tree->deleteKey(oldServersAmount);
         }
     }
-    return FAILURE; //no available servers
+
 }
 
-void DataCenter::usingFreeServer(int *assignedID, _node<Server> *freeServers, _node<Server> *usedServer) {
-    Server serverToUse = getValue(freeServers);
-    _node<Server> *oldServerPtr = arrayServersPointers[(serverToUse).serverID];
-    arrayServersPointers[serverToUse.serverID] = createNode(serverToUse);
-    addNode(&(usedServer), arrayServersPointers[(serverToUse).serverID]);
-    serverToUse.OS = usedServer;
-    removeNode(&(freeServers), oldServerPtr);
-    *assignedID = serverToUse.serverID;
-}
-
-void DataCenter::removeDSFromCountTree(AVLTree<int, AVLTree<int,int>*> tree, int oldServersAmount, int dataCenterID) {
-    AVLTree<int,int>* iDsTree = tree.findAVLNode(oldServersAmount)->getData();
-    iDsTree->deleteKey(dataCenterID);
-    if (iDsTree->getSize() == 0) {
-        tree.deleteKey(oldServersAmount);
-    }
-}
-
-void DataCenter::addDSToCountTree(AVLTree<int, AVLTree<int,int>*> tree, int newServersAmount, int dataCenterID) {
-    if (tree.isExist(newServersAmount)) {
-        AVLTree<int,int>* iDsTree = tree.findAVLNode(newServersAmount)->getData();
+void DataCenter::addDSToCountTree(AVLTree<int, AVLTree<int,int>*>* tree, int newServersAmount, int dataCenterID) {
+    if (tree->isExist(newServersAmount)) {
+        AVLTree<int,int>* iDsTree = tree->findAVLNode(newServersAmount)->getData();
         iDsTree->insert(dataCenterID,0);
     }
     else {
-        AVLTree<int, int> iDsTree = AVLTree<int,int>();
-        iDsTree.insert(dataCenterID,0);
-        tree.insert(newServersAmount,&iDsTree);
+        AVLTree<int, int>* iDsTree = new AVLTree<int,int>();
+        iDsTree->insert(dataCenterID,0);
+        tree->insert(newServersAmount,iDsTree);
     }
 }
 
-StatusType DataCenter::requestLinux(int serverID, int *assignedID,AVLTree<int, AVLTree<int,int>*> treeLinux,AVLTree<int, AVLTree<int,int>*> treeWindows) {
-    _node<Server> *originalPtr = arrayServersPointers[serverID];
-    if (originalPtr->value.OS == linuxFree || originalPtr->value.OS == windowsFree) {
-        arrayServersPointers[serverID] = createNode(getValue(arrayServersPointers[serverID]));
-        addNode(&(linuxUsed), arrayServersPointers[serverID]);
-        if (originalPtr->value.OS == linuxFree) { //the request server is free
-            removeNode(&(linuxFree), originalPtr);
+StatusType DataCenter::requestLinux(int serverID, int *assignedID,AVLTree<int, AVLTree<int,int>*>* treeLinux,AVLTree<int, AVLTree<int,int>*>* treeWindows) {
+    Node<Server>* originalPtr = this->arrayServersPointers[serverID];
+    if (originalPtr == nullptr) {
+        return FAILURE;
+    }
+    if(originalPtr->value.OS == linuxFree ||originalPtr->value.OS == windowsFree) {
+        Server *temp = new Server(linuxUsed,serverID);
+        arrayServersPointers[serverID] = linuxUsed->addNode(*temp);
+        if (originalPtr->value.OS == windowsFree) {
+            updateTreesCount(treeLinux, treeWindows, &linuxServerCounter, &windowsServerCounter);
+            windowsFree->removeNode(originalPtr);
+        } else {
+            linuxFree->removeNode(originalPtr);
         }
-        if (originalPtr->value.OS == windowsFree) { //the request server is free with different os
-            removeNode(&(windowsFree), originalPtr);
-            removeDSFromCountTree(treeLinux, this->linuxServerCounter, this->dataCenterID);
-            removeDSFromCountTree(treeWindows, this->windowsServerCounter, this->dataCenterID);
-            linuxServerCounter++;
-            windowsServerCounter--;
-            addDSToCountTree(treeLinux, this->linuxServerCounter, this->dataCenterID);
-            addDSToCountTree(treeWindows, this->windowsServerCounter, this->dataCenterID);
-        }
-        arrayServersPointers[serverID]->value.OS = linuxUsed;//downloading linux on the server & set it as used
         *assignedID = serverID;
         return SUCCESS;
     }
-
-    if (originalPtr->value.OS == linuxUsed) { //the requested server is used
-        if (linuxFree) {
-            usingFreeServer(assignedID, linuxFree, linuxUsed);
-            return SUCCESS;
-        } else { //there is no available server with the requested OS
-            if (windowsFree) {
-                usingFreeServer(assignedID, windowsFree, linuxUsed);
-                removeDSFromCountTree(treeLinux, this->linuxServerCounter, this->dataCenterID);
-                removeDSFromCountTree(treeWindows, this->windowsServerCounter, this->dataCenterID);
-                linuxServerCounter++;
-                windowsServerCounter--;
-                addDSToCountTree(treeLinux, this->linuxServerCounter, this->dataCenterID);
-                addDSToCountTree(treeWindows, this->windowsServerCounter, this->dataCenterID);
-                return SUCCESS;
-            }
-        }
+    if (!linuxFree->isEmpty()) {
+        assignServerFromFree(serverID, assignedID, linuxFree, linuxUsed);
+        return SUCCESS;
     }
-    return FAILURE; //no available servers
+    if (!windowsFree->isEmpty()) {
+        assignServerFromFree(serverID, assignedID, windowsFree, linuxUsed);
+        updateTreesCount(treeLinux, treeWindows, &linuxServerCounter, &windowsServerCounter);
+        return SUCCESS;
+    }
+    return FAILURE;
 }
 
-StatusType DataCenter::dataCenterRequestServer(int serverID, int os, int *assignedID,AVLTree<int, AVLTree<int,int>*> treeLinux,AVLTree<int, AVLTree<int,int>*> treeWindows) {
+void DataCenter::assignServerFromFree(int serverID, int *assignedID, List<Server>* freeServer, List<Server>* usedServers) {
+    int currID = freeServer->head->value.serverID;
+    Server *temp = new Server(usedServers, currID);
+    arrayServersPointers[serverID] = usedServers->addNode(*temp);
+    freeServer->removeNode(freeServer->head);
+    *assignedID = currID;
+}
+
+void DataCenter::updateTreesCount(AVLTree<int, AVLTree<int,int>*>* treeAdded , AVLTree<int, AVLTree<int,int>*>* treeRemoved, int* counterAdded, int* counterRemoved) {
+    removeDSFromCountTree(treeAdded, *counterAdded, dataCenterID);
+    removeDSFromCountTree(treeRemoved, *counterRemoved, dataCenterID);
+    (*counterAdded)++;
+    (*counterRemoved)--;
+    addDSToCountTree(treeAdded, *counterAdded, dataCenterID);
+    addDSToCountTree(treeRemoved, *counterRemoved, dataCenterID);
+}
+
+StatusType DataCenter::dataCenterRequestServer(int serverID, int os, int *assignedID,AVLTree<int, AVLTree<int,int>*>* treeLinux,AVLTree<int, AVLTree<int,int>*>* treeWindows) {
     if (serverID >= windowsServerCounter + linuxServerCounter) return INVALID_INPUT;
     return (os == 0) ? requestLinux(serverID, assignedID,treeLinux,treeWindows) : requestWindows(serverID, assignedID,treeLinux,treeWindows);
 }
 
 StatusType DataCenter::dataCenterFreeServer(int serverID) {
     if (serverID >= windowsServerCounter + linuxServerCounter) return INVALID_INPUT;
-    if ((arrayServersPointers[serverID]->value.OS == linuxFree) ||
-        (arrayServersPointers[serverID]->value.OS == windowsFree))
+    Node<Server>* originalPtr = arrayServersPointers[serverID];
+    if (originalPtr == nullptr || originalPtr->value.OS == linuxFree ||  originalPtr->value.OS == windowsFree ) {
         return FAILURE;
-    _node<Server> *originalPtr = arrayServersPointers[serverID];
-    if (arrayServersPointers[serverID]->value.OS == linuxUsed) {
-        arrayServersPointers[serverID] = createNode(getValue(arrayServersPointers[serverID]));
-        addNode(&(linuxFree), arrayServersPointers[serverID]);
-        removeNode(&(linuxUsed), originalPtr);
-        arrayServersPointers[serverID]->value.OS = linuxFree;
+    }
+    if (originalPtr->value.OS == linuxUsed) {
+        Server *temp = new Server(linuxFree, serverID);
+        linuxUsed->removeNode(originalPtr);
+        arrayServersPointers[serverID] = linuxFree->appendNode(*temp);
         return SUCCESS;
-    } else if (arrayServersPointers[serverID]->value.OS == windowsUsed) {
-        arrayServersPointers[serverID] = createNode(getValue(arrayServersPointers[serverID]));
-        addNode(&(windowsFree), arrayServersPointers[serverID]);
-        removeNode(&(windowsUsed), originalPtr);
-        arrayServersPointers[serverID]->value.OS = linuxFree;
+    }
+    if (originalPtr->value.OS == windowsUsed) {
+        Server *temp = new Server(windowsFree, serverID);
+        windowsUsed->removeNode(originalPtr);
+        arrayServersPointers[serverID] = windowsFree->appendNode(*temp);
         return SUCCESS;
     }
     return FAILURE;

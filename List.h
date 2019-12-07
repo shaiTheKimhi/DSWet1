@@ -1,87 +1,99 @@
 #pragma once
-
 #include<stdlib.h>
 #include "List.h"
 
+template <typename T>
+class List;
+template <typename T>
+class Node;
 
-template<typename T>
-struct _node {
+template <typename T>
+class Node {
+public:
+
     T value;
-    struct _node *_next;
-    struct _node *_prev;
+     Node* _next;
+     Node* _prev;
+
+     Node():value(NULL),_next(NULL),_prev(NULL){};
+     Node(T element, Node* nextInput = NULL, Node* prevInput = NULL): value(element),_next(nextInput),_prev(prevInput){};
+
+     friend class List<T>;
 };
 
-template<typename T>
-_node<T> *createNode(T value);
+template <typename T>
+class List {
+public:
 
-template<typename T>
-void addNode(_node<T> **head, _node<T> *n);
+    Node<T>* head;
+    Node<T>* tail;
 
-template<typename T>
-void removeNode(_node<T> **head, _node<T> *node);
+    ~List() {
+        while(tail) {
+            removeNode(tail);
+        }
+    };
 
-template<typename T>
-_node<T> *getNext(_node<T> *node);
-
-template<typename T>
-_node<T> *getPrevious(_node<T> *node);
-
-template<typename T>
-T getValue(_node<T> *node);
-
-
-//struct Node functions
-template<typename T>
-_node<T> *createNode(T value) {
-    _node<T> *t = (_node<T> *) malloc(sizeof(_node<T>));
-    t->value = value;
-    t->_prev = nullptr;
-    t->_next = nullptr;
-    return t;
-}
-
-template<typename T>
-void addNode(_node<T> **head, _node<T> *n) {
-    if (!head || !n)
-        return;
-    if (!(*head)) {
-        *head = n;
-        return;
+    Node<T>* addNode (T n) {
+        Node<T>* temp = new Node<T>(n);
+        if (!(this->head)) {
+            this->head = temp;
+            this->tail = temp;
+            return temp;
+        }
+        (this->head)->_prev = temp;
+        temp->_next = (this->head);
+        temp->_prev = nullptr;
+        (this->head) = temp;
+        return temp;
     }
-    (*head)->_prev = n;
-    n->_next = (*head);
-    n->_prev = 0;
-    (*head) = n;
-}
+    Node<T>* appendNode(T n) {
+        Node<T>* temp = new Node<T>(n);
+        if (!(this->tail)) {
+            this->tail = temp;
+            this->head = temp;
+            return temp;
+        }
+        (this->tail)->_next = temp;
+        temp->_prev = (this->tail);
+        temp->_next = nullptr;
+        (this->tail) = temp;
+        return temp;
+    }
+    void removeNode(Node<T>* node) {
+        if (!node || !this->head || !this->tail)
+            return;
+        if ((this->head) == node) {
+            (this->head) = node->_next;
+        }
+        if ((this->tail) == node) {
+            (this->tail) = node->_prev;
+        }
+        if (node->_next) {
+            node->_next->_prev = node->_prev;
+        }
+        if (node->_prev) {
+            node->_prev->_next = node->_next;
+        }
+        delete(node);
+        node = nullptr;
+    }
+    Node<T>* getNext(Node<T>* node) {
+        if (!node)
+            return NULL;
+        return node->_next;
+    }
+    Node<T>* getPrevious(Node<T>* node) {
+        if (!node)
+            return NULL;
+        return node->_prev;
+    }
+    T getValue(Node<T>* node) {
+        return node->value;
+    }
 
-template<typename T>
-void removeNode(_node<T> **head, _node<T> *node) {
-    if (!node || !head || !(*head))
-        return;
-    if ((*head) == node)
-        (*head) = node->_next;
-    if (node->_next)
-        node->_next->_prev = node->_prev;
-    if (node->_prev)
-        node->_prev->_next = node->_next;
-    free(node);
-}
+    bool isEmpty () {
+        return head;
+    }
+};
 
-template<typename T>
-_node<T> *getNext(_node<T> *node) {
-    if (!node)
-        return NULL;
-    return node->_next;
-}
-
-template<typename T>
-_node<T> *getPrevious(_node<T> *node) {
-    if (!node)
-        return NULL;
-    return node->_prev;
-}
-
-template<typename T>
-T getValue(_node<T> *node) {
-    return node->value;
-}

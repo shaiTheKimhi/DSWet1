@@ -80,49 +80,49 @@ StatusType RequestServer(void *DS, int dataCenterID, int serverID, int os, int *
         return FAILURE;
     DataCenter *dc = ds->_dataCentersById.findAVLNode(dataCenterID)->getData();
     int totalServerCount = dc->getLinuxCounter() + dc->getWindowsCounter();
-    if (totalServerCount >= serverID) {
+    if (totalServerCount <= serverID) {
         return INVALID_INPUT;
     }
 
     int linuxCount = dc->getLinuxCounter(), windowsCount = dc->getWindowsCounter();
-    dc->dataCenterRequestServer(serverID, os, assignedID, ds->_dataCentersByLinuxCount, ds->_dataCentersByWindowsCount);
+    dc->dataCenterRequestServer(serverID, os, assignedID, &(ds->_dataCentersByLinuxCount), &(ds->_dataCentersByWindowsCount));
 
-    //updating linux and windows avls:
-    int diff = dc->getLinuxCounter() - linuxCount;
-    if (diff != 0) {
-        //updating linux count avl:
-        AVLTree<int, int> *dataCentersWithLinuxServers = ds->_dataCentersByLinuxCount.findAVLNode(
-                linuxCount)->getData();
-        dataCentersWithLinuxServers->deleteKey(dataCenterID);
-        if (dataCentersWithLinuxServers->isEmpty()) {
-            delete dataCentersWithLinuxServers;
-            ds->_dataCentersByLinuxCount.deleteKey(linuxCount);
-        }
-        if (ds->_dataCentersByLinuxCount.findAVLNode(dc->getLinuxCounter()) == NULL) {
-            dataCentersWithLinuxServers = new AVLTree<int, int>();
-            dataCentersWithLinuxServers->insert(dataCenterID, dataCenterID);
-            ds->_dataCentersByLinuxCount.insert(dc->getLinuxCounter(), dataCentersWithLinuxServers);
-        } else {
-            dataCentersWithLinuxServers = ds->_dataCentersByLinuxCount.findAVLNode(dc->getLinuxCounter())->getData();
-            dataCentersWithLinuxServers->insert(dataCenterID, dataCenterID);
-        }
-
-        //updating windows count avl:
-        AVLTree<int, int> *dataCentersWithWindowsServers = ds->_dataCentersByWindowsCount.findAVLNode(windowsCount)->getData();
-        dataCentersWithWindowsServers->deleteKey(dataCenterID);
-        if (dataCentersWithWindowsServers->isEmpty()) {
-            delete dataCentersWithWindowsServers;
-            ds->_dataCentersByWindowsCount.deleteKey(windowsCount);
-        }
-        if (ds->_dataCentersByWindowsCount.findAVLNode(dc->getWindowsCounter()) == NULL) {
-            dataCentersWithWindowsServers = new AVLTree<int, int>();
-            dataCentersWithWindowsServers->insert(dataCenterID, dataCenterID);
-            ds->_dataCentersByLinuxCount.insert(dc->getWindowsCounter(), dataCentersWithWindowsServers);
-        } else {
-            dataCentersWithLinuxServers = ds->_dataCentersByLinuxCount.findAVLNode(dc->getWindowsCounter())->getData();
-            dataCentersWithLinuxServers->insert(dataCenterID, dataCenterID);
-        }
-    }
+//    //updating linux and windows avls:
+//    int diff = dc->getLinuxCounter() - linuxCount;
+//    if (diff != 0) {
+//        //updating linux count avl:
+//        AVLTree<int, int> *dataCentersWithLinuxServers = ds->_dataCentersByLinuxCount.findAVLNode(
+//                linuxCount)->getData();
+//        dataCentersWithLinuxServers->deleteKey(dataCenterID);
+//        if (dataCentersWithLinuxServers->isEmpty()) {
+//            delete dataCentersWithLinuxServers;
+//            ds->_dataCentersByLinuxCount.deleteKey(linuxCount);
+//        }
+//        if (ds->_dataCentersByLinuxCount.findAVLNode(dc->getLinuxCounter()) == NULL) {
+//            dataCentersWithLinuxServers = new AVLTree<int, int>();
+//            dataCentersWithLinuxServers->insert(dataCenterID, dataCenterID);
+//            ds->_dataCentersByLinuxCount.insert(dc->getLinuxCounter(), dataCentersWithLinuxServers);
+//        } else {
+//            dataCentersWithLinuxServers = ds->_dataCentersByLinuxCount.findAVLNode(dc->getLinuxCounter())->getData();
+//            dataCentersWithLinuxServers->insert(dataCenterID, dataCenterID);
+//        }
+//
+//        //updating windows count avl:
+//        AVLTree<int, int> *dataCentersWithWindowsServers = ds->_dataCentersByWindowsCount.findAVLNode(windowsCount)->getData();
+//        dataCentersWithWindowsServers->deleteKey(dataCenterID);
+//        if (dataCentersWithWindowsServers->isEmpty()) {
+//            delete dataCentersWithWindowsServers;
+//            ds->_dataCentersByWindowsCount.deleteKey(windowsCount);
+//        }
+//        if (ds->_dataCentersByWindowsCount.findAVLNode(dc->getWindowsCounter()) == NULL) {
+//            dataCentersWithWindowsServers = new AVLTree<int, int>();
+//            dataCentersWithWindowsServers->insert(dataCenterID, dataCenterID);
+//            ds->_dataCentersByLinuxCount.insert(dc->getWindowsCounter(), dataCentersWithWindowsServers);
+//        } else {
+//            dataCentersWithLinuxServers = ds->_dataCentersByLinuxCount.findAVLNode(dc->getWindowsCounter())->getData();
+//            dataCentersWithLinuxServers->insert(dataCenterID, dataCenterID);
+//        }
+   // }
 
 
     return SUCCESS;
