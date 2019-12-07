@@ -3,9 +3,9 @@
 
 class DataCenterSystem{
 public:
-    AVLTree<int, DataCenter*> _dataCentersById;
-    AVLTree<int, AVLTree<int,int>*> _dataCentersByLinuxCount;//seconds tree houses id's of data centers
-    AVLTree<int, AVLTree<int,int>*> _dataCentersByWindowsCount;
+    AVLTree<int, DataCenter*>* _dataCentersById;
+    AVLTree<int, AVLTree<int,int>*>* _dataCentersByLinuxCount;//seconds tree houses id's of data centers
+    AVLTree<int, AVLTree<int,int>*>* _dataCentersByWindowsCount;
 
 
 

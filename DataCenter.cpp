@@ -127,7 +127,9 @@ void DataCenter::updateTreesCount(AVLTree<int, AVLTree<int,int>*>* treeAdded , A
 }
 
 StatusType DataCenter::dataCenterRequestServer(int serverID, int os, int *assignedID,AVLTree<int, AVLTree<int,int>*>* treeLinux,AVLTree<int, AVLTree<int,int>*>* treeWindows) {
-    if (serverID >= windowsServerCounter + linuxServerCounter) return INVALID_INPUT;
+    if (serverID >= windowsServerCounter + linuxServerCounter) {
+        return INVALID_INPUT;
+    }
     return (os == 0) ? requestLinux(serverID, assignedID,treeLinux,treeWindows) : requestWindows(serverID, assignedID,treeLinux,treeWindows);
 }
 
