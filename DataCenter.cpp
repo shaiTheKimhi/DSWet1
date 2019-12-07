@@ -43,11 +43,11 @@ StatusType DataCenter::requestWindows(int serverID, int *assignedID,AVLTree<int,
         return SUCCESS;
     }
     if (!windowsFree->isEmpty()) {
-        assignServerFromFree(serverID, assignedID, windowsFree, windowsUsed);
+        assignServerFromFree(assignedID, windowsFree, windowsUsed);
         return SUCCESS;
     }
     if (!linuxFree->isEmpty()) {
-        assignServerFromFree(serverID, assignedID, linuxFree, windowsUsed);
+        assignServerFromFree(assignedID, linuxFree, windowsUsed);
         updateTreesCount(treeWindows, treeLinux, &windowsServerCounter, &linuxServerCounter);
         return SUCCESS;
     }
@@ -100,21 +100,21 @@ StatusType DataCenter::requestLinux(int serverID, int *assignedID,AVLTree<int, A
         return SUCCESS;
     }
     if (!linuxFree->isEmpty()) {
-        assignServerFromFree(serverID, assignedID, linuxFree, linuxUsed);
+        assignServerFromFree(assignedID, linuxFree, linuxUsed);
         return SUCCESS;
     }
     if (!windowsFree->isEmpty()) {
-        assignServerFromFree(serverID, assignedID, windowsFree, linuxUsed);
+        assignServerFromFree(assignedID, windowsFree, linuxUsed);
         updateTreesCount(treeLinux, treeWindows, &linuxServerCounter, &windowsServerCounter);
         return SUCCESS;
     }
     return FAILURE;
 }
 
-void DataCenter::assignServerFromFree(int serverID, int *assignedID, List<Server>* freeServer, List<Server>* usedServers) {
+void DataCenter::assignServerFromFree(int *assignedID, List<Server>* freeServer, List<Server>* usedServers) {
     int currID = freeServer->head->value.serverID;
     Server *temp = new Server(usedServers, currID);
-    arrayServersPointers[serverID] = usedServers->addNode(*temp);
+    arrayServersPointers[currID] = usedServers->addNode(*temp);
     freeServer->removeNode(freeServer->head);
     *assignedID = currID;
 }

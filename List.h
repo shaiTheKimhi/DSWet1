@@ -93,7 +93,7 @@ public:
     }
 
     bool isEmpty () {
-        return head;
+        return (head == nullptr) ;
     }
 };
 

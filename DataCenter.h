@@ -55,9 +55,7 @@ public:
     void updateTreesCount(AVLTree<int, AVLTree<int, int> *>* treeAdded, AVLTree<int, AVLTree<int, int> *>* treeRemoved,
                           int *counterAdded, int *counterRemoved);
 
-    void assignFromFree(int serverID, int *assignedID) const;
-
-    void assignServerFromFree(int serverID, int *assignedID, List<Server> *freeServer, List<Server> *usedServers);
+    void assignServerFromFree(int *assignedID, List<Server> *freeServer, List<Server> *usedServers);
 };
 
 
