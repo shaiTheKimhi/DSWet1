@@ -2,14 +2,15 @@
 
 #include "List.h"
 #include "AVLTree.h"
+#include "library1.h"
 
 
-typedef enum {
-    ALLOCATION_ERROR,
-    INVALID_INPUT,
-    FAILURE,
-    SUCCESS
-} StatusType;
+//typedef enum {
+//    ALLOCATION_ERROR,
+//    INVALID_INPUT,
+//    FAILURE,
+//    SUCCESS
+//} StatusType;
 
 class Server {
 public:

@@ -10,7 +10,7 @@ DataCenterSystem::~DataCenterSystem() {
     delete (this->_dataCentersById);
     this->_dataCentersById = nullptr;
 }
-void *Init() {
+void* DataCenterSystem::Init() {
     DataCenterSystem *ds = new DataCenterSystem();
     ds->_dataCentersById = new AVLTree<int, DataCenter*>();
     ds->_dataCentersByWindowsCount = new AVLTree<int, AVLTree<int,int>*>();
@@ -18,7 +18,7 @@ void *Init() {
     return (void *) ds;
 }
 
-void Quit(void** DS) {
+void DataCenterSystem::Quit(void** DS) {
     DataCenterSystem *ds = (DataCenterSystem *) *DS;
     if (ds != nullptr) {
         delete(ds);
@@ -26,7 +26,7 @@ void Quit(void** DS) {
     *DS = nullptr;
 }
 
-StatusType AddDataCenter(void *DS, int dataCenterID, int numOfServers) {
+StatusType DataCenterSystem::AddDataCenter(void *DS, int dataCenterID, int numOfServers) {
     if (numOfServers <= 0 || DS == nullptr || dataCenterID <= 0) {
         return INVALID_INPUT;
     }
@@ -41,7 +41,7 @@ StatusType AddDataCenter(void *DS, int dataCenterID, int numOfServers) {
     return SUCCESS;
 }
 
-StatusType RemoveDataCenter(void *DS, int dataCenterID) {
+StatusType DataCenterSystem::RemoveDataCenter(void *DS, int dataCenterID) {
     if (DS == nullptr || dataCenterID <= 0) {
         return INVALID_INPUT;
     }
@@ -72,7 +72,7 @@ StatusType RemoveDataCenter(void *DS, int dataCenterID) {
     return SUCCESS;
 }
 
-StatusType RequestServer(void *DS, int dataCenterID, int serverID, int os, int *assignedID) {
+StatusType DataCenterSystem::RequestServer(void *DS, int dataCenterID, int serverID, int os, int *assignedID) {
     if (DS == nullptr || dataCenterID <= 0 || os < 0 || os > 1 || assignedID == nullptr || serverID < 0) {
         return INVALID_INPUT;
     }
@@ -84,7 +84,7 @@ StatusType RequestServer(void *DS, int dataCenterID, int serverID, int os, int *
     return dc->dataCenterRequestServer(serverID, os, assignedID, ds->_dataCentersByLinuxCount, ds->_dataCentersByWindowsCount);
 }
 
-StatusType FreeServer(void *DS, int dataCenterID, int serverID) {
+StatusType DataCenterSystem::FreeServer(void *DS, int dataCenterID, int serverID) {
     if (DS == nullptr || dataCenterID <= 0 || serverID < 0)
         return INVALID_INPUT;
     DataCenterSystem *ds = (DataCenterSystem*) DS;
@@ -94,7 +94,7 @@ StatusType FreeServer(void *DS, int dataCenterID, int serverID) {
     return dc->dataCenterFreeServer(serverID);
 }
 
-StatusType GetDataCentersByOS(void* DS, int os, int **dataCenters, int* numOfDataCenters) {
+StatusType DataCenterSystem::GetDataCentersByOS(void* DS, int os, int **dataCenters, int* numOfDataCenters) {
     if (DS == nullptr || dataCenters == nullptr || numOfDataCenters == nullptr || os > 1 || os <0 ) {
         return INVALID_INPUT;
     }
