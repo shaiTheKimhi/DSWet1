@@ -23,10 +23,12 @@ public:
 
 template <typename T>
 class List {
+    int listSize = 0;
 public:
 
     Node<T>* head;
     Node<T>* tail;
+
 
     ~List() {
         while(tail) {
@@ -34,17 +36,20 @@ public:
         }
     };
 
+
     Node<T>* addNode (T n) {
         Node<T>* temp = new Node<T>(n);
         if (!(this->head)) {
             this->head = temp;
             this->tail = temp;
+            this->listSize++;
             return temp;
         }
         (this->head)->_prev = temp;
         temp->_next = (this->head);
         temp->_prev = nullptr;
         (this->head) = temp;
+        this->listSize++;
         return temp;
     }
     Node<T>* appendNode(T n) {
@@ -52,12 +57,14 @@ public:
         if (!(this->tail)) {
             this->tail = temp;
             this->head = temp;
+            this->listSize++;
             return temp;
         }
         (this->tail)->_next = temp;
         temp->_prev = (this->tail);
         temp->_next = nullptr;
         (this->tail) = temp;
+        this->listSize++;
         return temp;
     }
     void removeNode(Node<T>* node) {
@@ -75,8 +82,13 @@ public:
         if (node->_prev) {
             node->_prev->_next = node->_next;
         }
+        this->listSize--;
         delete(node);
         node = nullptr;
+    }
+
+    int getListSize () {
+        return this->listSize;
     }
     Node<T>* getNext(Node<T>* node) {
         if (!node)
