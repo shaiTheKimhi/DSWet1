@@ -163,6 +163,20 @@ public:
         return NULL;
     }
 
+    D* inOrderDataArray() {
+        D* inOrderData;
+        inOrderData = (D*)malloc(size*sizeof(*inOrderData));
+        if (inOrderData) {
+            AVLNode* nodes[size];
+            int i = 0;
+            inOrderNodeArray(root, nodes, &i);
+            for (int j = 0; j < size; ++j) {
+                inOrderData[j] = nodes[j]->data;
+            }
+            return inOrderData;
+        }
+        return NULL;
+    }
 
     void inOrderNodeArray(AVLNode* node, AVLNode* arr[], int* i) const {
         if (node) {
@@ -347,8 +361,8 @@ template<class K, class D>
 void AVLTree<K, D>::deleteNode(AVLNode* toDelete) {
     AVLNode* ancestor = toDelete->rightSon;
     if (toDelete->haveTwoSons()) { // node has Two sons
-        while (toDelete->rightSon->leftSon) {
-            toDelete->rightSon = toDelete->rightSon->leftSon;
+        while (ancestor->leftSon) {
+            ancestor = ancestor->leftSon;
         }
     } else if (toDelete->leftSon) { // node only have left son
         ancestor = toDelete->leftSon;
@@ -358,12 +372,19 @@ void AVLTree<K, D>::deleteNode(AVLNode* toDelete) {
         toDelete->data = ancestor->data;
         deleteNode(ancestor);
     } else { // node is a leaf or remained a leaf
-        if (toDelete->parent) {
-            (toDelete->parent->leftSon == toDelete ? toDelete->parent->leftSon : toDelete->parent->rightSon) = NULL;
-            delete toDelete;
-            reBalance(toDelete->parent, true);
+        AVLNode* parent = toDelete->parent;
+        if (!parent) {
+            root = nullptr;
         }
-        root = NULL;
+        else if (parent->leftSon == toDelete) {
+            parent->leftSon = nullptr;
+        }
+        else {
+            parent->rightSon = nullptr;
+        }
+        delete(toDelete);
+        toDelete = nullptr;
+        reBalance(parent,true);
     }
 }
 template<class K, class D>

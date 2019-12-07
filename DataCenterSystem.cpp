@@ -94,4 +94,54 @@ StatusType FreeServer(void *DS, int dataCenterID, int serverID) {
     return dc->dataCenterFreeServer(serverID);
 }
 
+StatusType GetDataCentersByOS(void* DS, int os, int **dataCenters, int* numOfDataCenters) {
+    if (DS == nullptr || dataCenters == nullptr || numOfDataCenters == nullptr || os > 1 || os <0 ) {
+        return INVALID_INPUT;
+    }
+    DataCenterSystem *ds = (DataCenterSystem*) DS;
+    if (ds->_dataCentersById->isEmpty()) {
+        return FAILURE;
+    }
+
+    //writing for linux only- change later
+    AVLTree<int,int>** tempArray = ds->_dataCentersByLinuxCount->inOrderDataArray();
+    if (tempArray == nullptr) {
+        return ALLOCATION_ERROR;
+    }
+    int tempArraySize = ds->_dataCentersByLinuxCount->getSize();
+    List<AVLTree<int,int>*>* tempList = new List<AVLTree<int,int>*>();
+    for (int i = 0; i < tempArraySize; i++) {
+        tempList->addNode(tempArray[i]);
+    }
+    List<int>* resultList = new List<int>();
+    for (int i = 0; i < tempArraySize ; i++) {
+        AVLTree<int,int>* currTree = tempList->head->value;
+        int tempInnerTreeSize = currTree->getSize();
+        int* tempIDs = currTree->inOrderKeyArray();
+        if (tempIDs == nullptr) {
+            return ALLOCATION_ERROR;
+        }
+        for (int j = 0 ; j < tempInnerTreeSize; j++){
+            resultList->appendNode(tempIDs[j]);
+        }
+        free(tempIDs);
+        tempIDs = nullptr;
+        tempList->removeNode(tempList->head);
+    }
+    free(tempArray);
+    tempArray = nullptr;
+    int size = resultList->getListSize();
+    int* dataCentersTemp = (int*)malloc(size* sizeof(int));
+    if (dataCentersTemp == nullptr) {
+        return ALLOCATION_ERROR;
+    }
+    *numOfDataCenters = resultList->getListSize();
+    for (int i = 0 ; i < *numOfDataCenters; i ++) {
+        int idToEnter = resultList->head->value;
+        dataCentersTemp[i] = idToEnter;
+        resultList->removeNode(resultList->head);
+    }
+    dataCenters=&dataCentersTemp;
+    return SUCCESS;
+}
 
