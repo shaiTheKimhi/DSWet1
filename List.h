@@ -47,7 +47,7 @@ public:
         }
         (this->head)->_prev = temp;
         temp->_next = (this->head);
-        temp->_prev = nullptr;
+        temp->_prev = NULL;
         (this->head) = temp;
         this->listSize++;
         return temp;
@@ -62,7 +62,7 @@ public:
         }
         (this->tail)->_next = temp;
         temp->_prev = (this->tail);
-        temp->_next = nullptr;
+        temp->_next = NULL;
         (this->tail) = temp;
         this->listSize++;
         return temp;
@@ -84,7 +84,7 @@ public:
         }
         this->listSize--;
         delete(node);
-        node = nullptr;
+        node = NULL;
     }
 
     int getListSize () {
@@ -105,7 +105,7 @@ public:
     }
 
     bool isEmpty () {
-        return (head == nullptr) ;
+        return (head == NULL) ;
     }
 };
 

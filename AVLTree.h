@@ -374,16 +374,16 @@ void AVLTree<K, D>::deleteNode(AVLNode* toDelete) {
     } else { // node is a leaf or remained a leaf
         AVLNode* parent = toDelete->parent;
         if (!parent) {
-            root = nullptr;
+            root = NULL;
         }
         else if (parent->leftSon == toDelete) {
-            parent->leftSon = nullptr;
+            parent->leftSon = NULL;
         }
         else {
-            parent->rightSon = nullptr;
+            parent->rightSon = NULL;
         }
         delete(toDelete);
-        toDelete = nullptr;
+        toDelete = NULL;
         reBalance(parent,true);
     }
 }

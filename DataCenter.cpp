@@ -22,20 +22,20 @@ DataCenter::DataCenter(int servers, int dataCenterID, AVLTree<int, AVLTree<int,i
 
 DataCenter::~DataCenter() {
     delete(this->windowsFree);
-    this->windowsFree = nullptr;
+    this->windowsFree = NULL;
     delete(this->windowsUsed);
-    this->windowsUsed = nullptr;
+    this->windowsUsed = NULL;
     delete(this->linuxFree);
-    this->linuxFree = nullptr;
+    this->linuxFree = NULL;
     delete(this->linuxUsed);
-    this->linuxUsed = nullptr;
+    this->linuxUsed = NULL;
     delete[](this->arrayServersPointers);
-    this->arrayServersPointers = nullptr;
+    this->arrayServersPointers = NULL;
 }
 
 StatusType DataCenter::requestWindows(int serverID, int *assignedID,AVLTree<int, AVLTree<int,int>*>* treeLinux,AVLTree<int, AVLTree<int,int>*>* treeWindows) {
     Node<Server>* originalPtr = this->arrayServersPointers[serverID];
-    if (originalPtr == nullptr) {
+    if (originalPtr == NULL) {
         return FAILURE;
     }
     if(originalPtr->value.OS == linuxFree ||originalPtr->value.OS == windowsFree) {
@@ -87,7 +87,7 @@ void DataCenter::addDSToCountTree(AVLTree<int, AVLTree<int,int>*>* tree, int new
 
 StatusType DataCenter::requestLinux(int serverID, int *assignedID,AVLTree<int, AVLTree<int,int>*>* treeLinux,AVLTree<int, AVLTree<int,int>*>* treeWindows) {
     Node<Server>* originalPtr = this->arrayServersPointers[serverID];
-    if (originalPtr == nullptr) {
+    if (originalPtr == NULL) {
         return FAILURE;
     }
     if(originalPtr->value.OS == linuxFree ||originalPtr->value.OS == windowsFree) {
@@ -148,7 +148,7 @@ StatusType DataCenter::dataCenterRequestServer(int serverID, int os, int *assign
 StatusType DataCenter::dataCenterFreeServer(int serverID) {
     if (serverID >= windowsServerCounter + linuxServerCounter) return INVALID_INPUT;
     Node<Server>* originalPtr = arrayServersPointers[serverID];
-    if (originalPtr == nullptr || originalPtr->value.OS == linuxFree ||  originalPtr->value.OS == windowsFree ) {
+    if (originalPtr == NULL || originalPtr->value.OS == linuxFree ||  originalPtr->value.OS == windowsFree ) {
         return FAILURE;
     }
     if (originalPtr->value.OS == linuxUsed) {

@@ -4,11 +4,11 @@
 
 DataCenterSystem::~DataCenterSystem() {
     delete (this->_dataCentersByLinuxCount);
-    this->_dataCentersByLinuxCount = nullptr;
+    this->_dataCentersByLinuxCount = NULL;
     delete(this->_dataCentersByWindowsCount);
-    this->_dataCentersByWindowsCount = nullptr;
+    this->_dataCentersByWindowsCount = NULL;
     delete (this->_dataCentersById);
-    this->_dataCentersById = nullptr;
+    this->_dataCentersById = NULL;
 }
 void DataCenterSystem::Init() {
     this->_dataCentersById = new AVLTree<int, DataCenter*>();
@@ -18,18 +18,18 @@ void DataCenterSystem::Init() {
 
 void DataCenterSystem::Quit(void** DS) {
     DataCenterSystem *ds = (DataCenterSystem *) *DS;
-    if (ds != nullptr) {
+    if (ds != NULL) {
         delete(ds);
     }
-    *DS = nullptr;
+    *DS = NULL;
 }
 
 StatusType DataCenterSystem::AddDataCenter(int dataCenterID, int numOfServers) {
     if (numOfServers <= 0 || dataCenterID <= 0) {
         return INVALID_INPUT;
     }
-    if (this->_dataCentersById != nullptr){
-        if (this->_dataCentersById->findAVLNode(dataCenterID) != nullptr) {
+    if (this->_dataCentersById != NULL){
+        if (this->_dataCentersById->findAVLNode(dataCenterID) != NULL) {
             return FAILURE;
         }
     }
@@ -64,12 +64,12 @@ StatusType DataCenterSystem::RemoveDataCenter(int dataCenterID) {
         }
     }
     delete dc;
-    dc = nullptr;
+    dc = NULL;
     return SUCCESS;
 }
 
 StatusType DataCenterSystem::RequestServer(int dataCenterID, int serverID, int os, int *assignedID) {
-    if (dataCenterID <= 0 || os < 0 || os > 1 || assignedID == nullptr || serverID < 0) {
+    if (dataCenterID <= 0 || os < 0 || os > 1 || assignedID == NULL || serverID < 0) {
         return INVALID_INPUT;
     }
     if ((!this->_dataCentersById->isExist(dataCenterID))) {
@@ -82,14 +82,14 @@ StatusType DataCenterSystem::RequestServer(int dataCenterID, int serverID, int o
 StatusType DataCenterSystem::FreeServer(int dataCenterID, int serverID) {
     if (dataCenterID <= 0 || serverID < 0)
         return INVALID_INPUT;
-    if (this->_dataCentersById->findAVLNode(dataCenterID) == nullptr)
+    if (this->_dataCentersById->findAVLNode(dataCenterID) == NULL)
         return FAILURE;
     DataCenter *dc = this->_dataCentersById->findAVLNode(dataCenterID)->getData();
     return dc->dataCenterFreeServer(serverID);
 }
 
 StatusType DataCenterSystem::GetDataCentersByOS(int os, int **dataCenters, int* numOfDataCenters) {
-    if (dataCenters == nullptr || numOfDataCenters == nullptr || os > 1 || os <0 ) {
+    if (dataCenters == NULL || numOfDataCenters == NULL || os > 1 || os <0 ) {
         return INVALID_INPUT;
     }
 
@@ -98,7 +98,7 @@ StatusType DataCenterSystem::GetDataCentersByOS(int os, int **dataCenters, int* 
     }
 
     AVLTree<int,int>** tempArray = (os == 0) ? this->_dataCentersByLinuxCount->inOrderDataArray() : this->_dataCentersByWindowsCount->inOrderDataArray() ;
-    if (tempArray == nullptr) {
+    if (tempArray == NULL) {
         return ALLOCATION_ERROR;
     }
     int tempArraySize = (os == 0) ? this->_dataCentersByLinuxCount->getSize() : this->_dataCentersByWindowsCount->getSize() ;
@@ -111,21 +111,21 @@ StatusType DataCenterSystem::GetDataCentersByOS(int os, int **dataCenters, int* 
         AVLTree<int,int>* currTree = tempList->head->value;
         int tempInnerTreeSize = currTree->getSize();
         int* tempIDs = currTree->inOrderKeyArray();
-        if (tempIDs == nullptr) {
+        if (tempIDs == NULL) {
             return ALLOCATION_ERROR;
         }
         for (int j = 0 ; j < tempInnerTreeSize; j++){
             resultList->appendNode(tempIDs[j]);
         }
         free(tempIDs);
-        tempIDs = nullptr;
+        tempIDs = NULL;
         tempList->removeNode(tempList->head);
     }
     free(tempArray);
-    tempArray = nullptr;
+    tempArray = NULL;
     int size = resultList->getListSize();
     int* dataCentersTemp = (int*)malloc(size* sizeof(int));
-    if (dataCentersTemp == nullptr) {
+    if (dataCentersTemp == NULL) {
         return ALLOCATION_ERROR;
     }
     *numOfDataCenters = resultList->getListSize();
