@@ -16,6 +16,8 @@ DataCenter::DataCenter(int servers, int dataCenterID, AVLTree<int, AVLTree<int,i
         this->arrayServersPointers[i] = linuxFree->appendNode(*temp);
     }
     addDSToCountTree(treeLinux,this->linuxServerCounter, dataCenterID);
+    //if needed 0 servers in GetDataCentersByOS
+    addDSToCountTree(treeWindows,this->windowsServerCounter, dataCenterID);
 }
 
 DataCenter::~DataCenter() {
@@ -72,7 +74,7 @@ void DataCenter::removeDSFromCountTree(AVLTree<int, AVLTree<int,int>*>* tree, in
 }
 
 void DataCenter::addDSToCountTree(AVLTree<int, AVLTree<int,int>*>* tree, int newServersAmount, int dataCenterID) {
-    if (tree != nullptr && tree->isExist(newServersAmount)) {
+    if (tree->isExist(newServersAmount)) {
         AVLTree<int,int>* iDsTree = tree->findAVLNode(newServersAmount)->getData();
         iDsTree->insert(dataCenterID,0);
     }
@@ -126,9 +128,14 @@ void DataCenter::updateTreesCount(AVLTree<int, AVLTree<int,int>*>* treeAdded , A
     (*counterAdded)++;
     (*counterRemoved)--;
     addDSToCountTree(treeAdded, *counterAdded, dataCenterID);
-    if ((*counterRemoved) != 0) {
-        addDSToCountTree(treeRemoved, *counterRemoved, dataCenterID);
-    }
+
+    //if needed 0 count
+    addDSToCountTree(treeRemoved, *counterRemoved, dataCenterID);
+
+   //if not needed 0 count - than this instead of above
+//    if ((*counterRemoved) != 0) {
+//        addDSToCountTree(treeRemoved, *counterRemoved, dataCenterID);
+//    }
 }
 
 StatusType DataCenter::dataCenterRequestServer(int serverID, int os, int *assignedID,AVLTree<int, AVLTree<int,int>*>* treeLinux,AVLTree<int, AVLTree<int,int>*>* treeWindows) {
