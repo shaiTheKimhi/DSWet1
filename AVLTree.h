@@ -62,7 +62,6 @@ class AVLTree {
     AVLNode* root; //Any tree is a Node as a root
     int size; //how many nodes
 
-    //main funcs in avl tree
     void insert(K key, D data, AVLNode* parent);
     void deleteNode(AVLNode* toDelete);
 
@@ -77,7 +76,7 @@ public:
         }
     }
     bool isEmpty();
-    //auxiliary funcs to main funcs
+
     void insert(K key, D data);
     bool deleteKey(K key);
     bool isExist(K key) const;
@@ -147,7 +146,6 @@ public:
         return root->height;
     }
 
-    //TODO: check if needed, check how to free? if needed - needs malloc!
     K* inOrderKeyArray() const {
         K* inOrderKeys;
         inOrderKeys = (K*)malloc(size*sizeof(*inOrderKeys));
@@ -186,8 +184,7 @@ public:
             inOrderNodeArray(node->rightSon, arr, i);
         }
     }
-
-    //TODO: check if needed
+    
     K* postOrderKeyArray() const {
         K* postOrderKeys;
         postOrderKeys = (K*)malloc(size*sizeof(*postOrderKeys));
@@ -211,7 +208,6 @@ public:
         }
     }
 
-    //TODO: check if needed
     K* preOrderKeyArray() const {
         K* preOrderKeys;
         preOrderKeys = (K*)malloc(size*sizeof(*preOrderKeys));
@@ -232,55 +228,6 @@ public:
             (*i)++;
             preOrderNodeArray(node->leftSon, arr, i);
             preOrderNodeArray(node->rightSon, arr, i);
-        }
-    }
-    //TODO:print funcs for debug only - no need to submit (delete before submit)
-    void inorderPrint(AVLNode* n) const {
-        if (n) {
-            inorderPrint(n->leftSon);
-            cout << n->key << " ";
-            inorderPrint(n->rightSon);
-        }
-    }
-
-
-
-
-    void print() const {
-        if (size == 0) cout << "Empty tree" << endl;
-        else inorderPrint(root);
-        cout << "\nDone" << endl;
-    }
-    void printByLevel() const {
-        cout << "Printing by levels: ";
-        for (int i = 0; i <= root->height; ++i) {
-            cout << "\nLevel " << i + 1 << ": ";
-            printLevel(root, i);
-        }
-    }
-    void printLevel(AVLNode* node, int level) const {
-        if (node) {
-            if (level == 0) {
-                cout << node->key << " ";
-            } else {
-                printLevel(node->left, level - 1);
-                printLevel(node->right, level - 1);
-            }
-        }
-    }
-    void printGraph(bool BF = false) const {
-        printGraph(root, "", BF);
-    }
-
-    void printGraph(AVLNode* node, const std::string& prefix, bool BF) const {
-        if (node) {
-            printGraph(node->rightSon, prefix + "     ", BF);
-            cout << prefix;
-            cout << "|--[";
-            cout << node->key;
-            if (BF) cout << ", BF: " << node->getBalanceFactor();
-            cout << "]" << endl;
-            printGraph(node->leftSon, prefix + "     ", BF);
         }
     }
 
