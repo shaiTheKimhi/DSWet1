@@ -5,11 +5,7 @@
 #ifndef AVLTREE_AVLTREE_H
 #define AVLTREE_AVLTREE_H
 
-#include <iostream>
 #include <cmath>
-
-using std::cout;
-using std::endl;
 
 template<class K, class D>
 class AVLTree {
