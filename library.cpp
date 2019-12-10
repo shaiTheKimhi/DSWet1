@@ -1,10 +1,18 @@
+#include <exception>
+#include <new>
 #include "library1.h"
 #include "DataCenterSystem.h"
+using std::exception;
 
 void *Init() {
-    DataCenterSystem *DS = new DataCenterSystem();
-    DS->Init();
-    return (void*)DS;
+    try {
+        DataCenterSystem *DS = new DataCenterSystem();
+        DS->Init();
+        return (void*)DS;
+    }
+    catch(std::bad_alloc &ba) {
+        return NULL;
+    }
 }
 
 StatusType AddDataCenter(void *DS, int dataCenterID, int numOfServers) {
