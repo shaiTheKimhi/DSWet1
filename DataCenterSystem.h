@@ -1,5 +1,8 @@
 #pragma once
+
+#include <exception>
 #include"DataCenter.h"
+using std::exception;
 
 class DataCenterSystem{
 public:
